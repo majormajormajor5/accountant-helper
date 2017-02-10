@@ -105,7 +105,10 @@
 </nav>
 
 <div class="container">
-    @yield('content')
+    <div id="app">
+        @yield('content')
+    </div>
+    @yield('templates')
 </div>
 
 <script src="/js/app.js"></script>

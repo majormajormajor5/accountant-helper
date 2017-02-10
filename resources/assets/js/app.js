@@ -14,7 +14,5 @@ require('./bootstrap');
  */
 
 Vue.component('example', require('./components/Example.vue'));
+Vue.component('alert', require('./components/Alert.vue'));
 
-const app = new Vue({
-    el: '#app'
-});
