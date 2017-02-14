@@ -8,9 +8,14 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Symfony\Component\HttpKernel\HttpCache\Store;
 use App\Http\Requests\StoreOrganizationRequest;
+use Illuminate\Support\Facades\Auth;
 
 class OrganizationController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -18,7 +23,7 @@ class OrganizationController extends Controller
      */
     public function index()
     {
-        $organizations = Organization::all();
+        $organizations = Auth::user()->organizations()->get();
 
         return view('organization.index', compact('organizations'));
     }
@@ -43,6 +48,7 @@ class OrganizationController extends Controller
      */
     public function store(StoreOrganizationRequest $request)
     {
+        $request['user_id'] = Auth::user()->id;
         Organization::create($request->all());
 
         return redirect('organizations');
@@ -90,6 +96,10 @@ class OrganizationController extends Controller
      */
     public function destroy($id)
     {
-        //
+        if (Organization::destroy($id)) {
+            return response('', 200);
+        }
+
+        return response(view('organization.partials.cannot-delete-alert'), 200);
     }
 }

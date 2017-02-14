@@ -47,6 +47,6 @@
             el: '#app'
         });
 
-        document.getElementById('alert-message-bag').innerHTML += document.getElementById('errors').innerHTML;
+        document.getElementsByClassName('alert-message-bag')[0].innerHTML += document.getElementById('errors').innerHTML;
     </script>
 @endsection

@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Organization extends Model
 {
     protected $fillable = [
-        'name'
+        'name', 'user_id'
     ];
+
+    public function user()
+    {
+        $this->belongsTo('App\User');
+    }
 }
