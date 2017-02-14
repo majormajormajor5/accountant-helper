@@ -13,9 +13,118 @@
 
     @yield('css')
 
+    <script>
+        window.trans = <?php
+        // copy all translations from /resources/lang/CURRENT_LOCALE/* to global JS variable
+        $lang_files = File::files(resource_path() . '/lang/' . App::getLocale());
+        $trans = [];
+        foreach ($lang_files as $f) {
+            $filename = pathinfo($f)['filename'];
+            $trans[$filename] = trans($filename);
+        }
+        echo json_encode($trans);
+        ?>;
+    </script>
     <!--[if lt IE 9]>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
     <![endif]-->
+    <style>
+        .vue-modal {
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            transition: opacity .3s ease;
+        }
+
+        /* Modal Content */
+        .vue-modal-content {
+            position: relative;
+            background-color: #fefefe;
+            margin: auto;
+            padding: 0;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+            -webkit-animation-name: animatetop;
+            -webkit-animation-duration: 0.4s;
+            animation-name: animatetop;
+            transition: all .3s ease;
+            animation-duration: 0.4s
+        }
+
+        .modal-mask {
+            position: fixed;
+            z-index: 9998;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, .5);
+            display: table;
+            transition: opacity .3s ease;
+        }
+
+        .modal-wrapper {
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+        .modal-container {
+            width: 700px;
+            margin: 0px auto;
+            padding: 20px 30px;
+            background-color: #fff;
+            border-radius: 2px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
+            transition: all .3s ease;
+            font-family: Helvetica, Arial, sans-serif;
+        }
+
+        .modal-header h3 {
+            margin-top: 0;
+            color: #42b983;
+        }
+
+        .modal-body {
+            margin: 20px 0;
+        }
+
+        .modal-default-button {
+            float: right;
+        }
+
+        /*
+         * The following styles are auto-applied to elements with
+         * transition="modal" when their visibility is toggled
+         * by Vue.js.
+         *
+         * You can easily play with the modal transition by editing
+         * these styles.
+         */
+
+        .modal-enter {
+            opacity: 0;
+        }
+
+        .modal-leave-active {
+            opacity: 0;
+        }
+
+        .modal-enter .modal-container,
+        .modal-leave-active .modal-container {
+            -webkit-transform: scale(1.1);
+            transform: scale(1.1);
+        }
+    </style>
+    <!-- template for the modal component -->
 </head>
 
 <body>

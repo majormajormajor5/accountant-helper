@@ -14,4 +14,9 @@ require('./bootstrap');
 Vue.component('example', require('./components/Example.vue'));
 Vue.component('alert', require('./components/Alert.vue'));
 Vue.component('alert-hidden', require('./components/AlertHidden.vue'));
+Vue.component('vue-modal', require('./components/VueModal.vue'));
 // Vue.directive('ajaxform', require('./directives/ajaxform.js'));
+Vue.prototype.trans = (key) => {
+    return _.get(window.trans, key, key);
+};
+

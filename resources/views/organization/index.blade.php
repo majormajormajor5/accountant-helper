@@ -25,7 +25,7 @@
                     </thead>
                     <tbody>
                         @foreach ($organizations as $organization)
-                            <tr>
+                            <tr v-if="organization" v-on:dblclick.ctrl="organization = !organization">
                                 <td style="word-break: break-all!important;">
                                     {{ $organization->name }}
                                 </td>
@@ -34,10 +34,9 @@
                                 </td>
                                 <td>
                                     {!! Form::open(['url' => 'organizations/'. $organization->id, 'method'=> 'DELETE', '@submit.prevent' => 'deleteOrganization', 'v-ajaxform' => 'true']) !!}
-                                        <button href="{{ url('organizations/' . $organization->id) }}"
-                                                type="submit" role="button" class="btn btn-info"
-                                                {{--data-toggle="modal"--}}
-                                                {{--data-target="#myModal"--}}
+                                        <button type="submit"
+                                                role="button"
+                                                class="btn btn-info"
                                         >
                                             <span class="glyphicon glyphicon-trash"></span>@desktop Удалить@enddesktop
                                         </button>
@@ -52,30 +51,17 @@
             <div class="col-sm-2"></div>
         </div>
 
-        {{--<h2>Modal Example</h2>--}}
-        {{--<!-- Trigger the modal with a button -->--}}
-        {{--<button type="button" class="btn btn-info btn-lg" >Open Modal</button>--}}
-
-        {{--<!-- Modal -->--}}
-        {{--<div class="modal fade" id="myModal" role="dialog">--}}
-            {{--<div class="modal-dialog">--}}
-
-                {{--<!-- Modal content-->--}}
-                {{--<div class="modal-content">--}}
-                    {{--<div class="modal-header">--}}
-                        {{--<button type="button" class="close" data-dismiss="modal">&times;</button>--}}
-                        {{--<h4 class="modal-title">Modal Header</h4>--}}
-                    {{--</div>--}}
-                    {{--<div class="modal-body">--}}
-                        {{--<p>Some text in the modal.</p>--}}
-                    {{--</div>--}}
-                    {{--<div class="modal-footer">--}}
-                        {{--<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>--}}
-                    {{--</div>--}}
-                {{--</div>--}}
-
-            {{--</div>--}}
-        {{--</div>--}}
+        <button id="vue-show-modal" v-show="false" @click="showModal = true" class="hidden">Show Modal</button>
+        <!-- use the modal component, pass in the prop -->
+        <div class="hidden vue-hidden-container">
+            <vue-modal v-show="showModal" @close="showModal = false">
+            <!--
+              you can use custom content here to overwrite
+              default content
+            -->
+            <h4 slot="body">Вы точно хотите удалить эту организацию?</h4>
+            </vue-modal>
+        </div>
 @endsection
 
 @section('js')
@@ -87,27 +73,17 @@
 
                     var button = el.querySelector('button[type="submit"]');
                     button.disabled = false;
-                    var resetForm = true;
                     var formData = new FormData(el);
 
-                    var formInstance = el;
                     var method = el.method.toUpperCase();
                     var url = el.action;
-
-                    var xmlhttp = new XMLHttpRequest();
-                    xmlhttp.onreadystatechange = function() {
-                        if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-                            if (xmlhttp.status == 200) {
-                                document.getElementsByClassName('alert-message-bag')[0].innerHTML = xmlhttp.responseText;
-                                if (xmlhttp.responseText !== '') {
-                                    app.emitAlert();
-                                }
-                            }
-                        }
-                    };
-
-                    xmlhttp.open(method, url, true);
-                    xmlhttp.send(formData);
+                    window.lastReadyForSubmitForm = {};
+                    window.lastReadyForSubmitForm.formData = formData;
+                    window.lastReadyForSubmitForm.url = url;
+                    window.lastReadyForSubmitForm.method = method;
+                    window.lastReadyForSubmitForm.el = el;
+                    //Trigger click to make modal open
+                    document.getElementById('vue-show-modal').click();
                 });
             }
         });
@@ -117,6 +93,10 @@
         var app = new Vue({
            el: '#app',
 
+           created: function () {
+               bus.$on('modal-confirmed', this.submitAjaxRequest)
+           },
+
            methods: {
                deleteOrganization: function () {
 
@@ -124,14 +104,52 @@
 
                emitAlert: function () {
                    bus.$emit('new-message', this.message);
+               },
+
+               submitAjaxRequest: function () {
+                   var xmlhttp = new XMLHttpRequest();
+                   xmlhttp.onreadystatechange = function() {
+                       if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+                           if (xmlhttp.status == 200) {
+                               document.getElementsByClassName('alert-message-bag')[0].innerHTML = xmlhttp.responseText;
+                               if (xmlhttp.responseText !== '') {
+                                   this.emitAlert();
+                               }
+                               else {
+                                   app.$emit('remove');
+                               }
+                           }
+                       }
+                   };
+
+                   xmlhttp.open(window.lastReadyForSubmitForm.method, window.lastReadyForSubmitForm.url, true);
+                   xmlhttp.send(window.lastReadyForSubmitForm.formData);
                }
            },
 
            data: function () {
                return {
-                   message: 'message'
+                   message: 'message',
+                   showModal: false,
+                   organization: true
                }
            }
         });
+
+        HTMLElement.prototype.removeClass = function(remove) {
+            var newClassName = "";
+            var i;
+            var classes = this.className.split(" ");
+            for(i = 0; i < classes.length; i++) {
+                if(classes[i] !== remove) {
+                    newClassName += classes[i] + " ";
+                }
+            }
+            this.className = newClassName;
+        };
+
+        (function() {
+            document.querySelector('.vue-hidden-container').removeClass('hidden');
+        })();
     </script>
 @endsection

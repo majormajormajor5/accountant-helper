@@ -43,6 +43,8 @@
 
 @section('js')
     <script>
+        var bus = new Vue();
+
         new Vue({
             el: '#app'
         });
