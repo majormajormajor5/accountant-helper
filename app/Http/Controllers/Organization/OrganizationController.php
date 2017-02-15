@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Organization;
 
 use App\Http\Requests\StoreOrganization;
+use App\Http\Requests\UpdateOrganizationRequest;
 use App\Organization;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -73,7 +74,10 @@ class OrganizationController extends Controller
      */
     public function edit($id)
     {
-        //
+        $organization = Organization::where('id', $id)
+            ->where('user_id', Auth::user()->id)->firstOrFail();
+
+        return view('organization.edit', compact('organization'));
     }
 
     /**
@@ -83,9 +87,13 @@ class OrganizationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateOrganizationRequest $request, $id)
     {
-        //
+        if (Organization::firstOrFail($id)->update($request->all())) {
+            return redirect('organization.index');
+        }
+
+        return redirect()->back();
     }
 
     /**

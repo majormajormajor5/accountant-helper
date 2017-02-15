@@ -25,15 +25,26 @@
                     </thead>
                     <tbody>
                         @foreach ($organizations as $organization)
-                            <tr v-if="organization" v-on:dblclick.ctrl="organization = !organization">
+{{--                            <tr v-if="organizations[{{ $loop->index . '' }}]" v-on:dblclick.ctrl="deleteRow" id="{{ 'org' . $loop->index }}">--}}
+                            <tr v-if="organizations[{{ $loop->index . '' }}]" v-on:dblclick.ctrl="organizations[{{ $loop->index . '' }}] = false" id="{{ 'org' . $loop->index }}">
                                 <td style="word-break: break-all!important;">
                                     {{ $organization->name }}
                                 </td>
                                 <td>
-                                    <a href="#" type="button" role="button" class="btn btn-info edit-button" data-toggle="popover" title="Popover Header" data-content="Some content inside the popover"><span class="glyphicon glyphicon-edit"></span> @desktop Редактировать &nbsp; &nbsp; @enddesktop</a>
+                                    <a href="{{ url('organizations/' . $organization->id . '/edit') }}"
+                                       type="button"
+                                       role="button"
+                                       class="btn btn-info edit-button"
+                                    >
+                                        <span class="glyphicon glyphicon-edit"></span> @desktop Редактировать &nbsp; &nbsp; @enddesktop
+                                    </a>
                                 </td>
                                 <td>
-                                    {!! Form::open(['url' => 'organizations/'. $organization->id, 'method'=> 'DELETE', '@submit.prevent' => 'deleteOrganization', 'v-ajaxform' => 'true']) !!}
+                                    {!! Form::open(['url' => 'organizations/'. $organization->id,
+                                                    'method'=> 'DELETE',
+                                                    '@submit' => 'deleteOrganization'
+                                                    ])
+                                    !!}
                                         <button type="submit"
                                                 role="button"
                                                 class="btn btn-info"
@@ -66,27 +77,27 @@
 
 @section('js')
     <script>
-        Vue.directive('ajaxform', {
-            bind: function (el, binging, vnode) {
-                el.addEventListener('submit', function (e) {
-                    e.preventDefault();
-
-                    var button = el.querySelector('button[type="submit"]');
-                    button.disabled = false;
-                    var formData = new FormData(el);
-
-                    var method = el.method.toUpperCase();
-                    var url = el.action;
-                    window.lastReadyForSubmitForm = {};
-                    window.lastReadyForSubmitForm.formData = formData;
-                    window.lastReadyForSubmitForm.url = url;
-                    window.lastReadyForSubmitForm.method = method;
-                    window.lastReadyForSubmitForm.el = el;
-                    //Trigger click to make modal open
-                    document.getElementById('vue-show-modal').click();
-                });
-            }
-        });
+//        Vue.directive('ajaxform', {
+//            bind: function (el, binging, vnode) {
+//                el.addEventListener('submit', function (e) {
+//                    e.preventDefault();
+//
+//                    var button = el.querySelector('button[type="submit"]');
+//                    button.disabled = false;
+//                    var formData = new FormData(el);
+//
+//                    var method = el.method.toUpperCase();
+//                    var url = el.action;
+//                    window.lastReadyForSubmitForm = {};
+//                    window.lastReadyForSubmitForm.formData = formData;
+//                    window.lastReadyForSubmitForm.url = url;
+//                    window.lastReadyForSubmitForm.method = method;
+//                    window.lastReadyForSubmitForm.el = el;
+//                    //Trigger click to make modal open
+//                    document.getElementById('vue-show-modal').click();
+//                });
+//            }
+//        });
 
         var bus = new Vue();
 
@@ -94,12 +105,27 @@
            el: '#app',
 
            created: function () {
-               bus.$on('modal-confirmed', this.submitAjaxRequest)
+               bus.$on('modal-confirmed', this.submitAjaxRequest);
+               console.log(this.organizations);
            },
 
            methods: {
-               deleteOrganization: function () {
+               deleteOrganization: function (e) {
+                   e.preventDefault();
+                   var el = e.target;
+                   var button = el.querySelector('button[type="submit"]');
+                   button.disabled = false;
+                   var formData = new FormData(el);
 
+                   var method = el.method.toUpperCase();
+                   var url = el.action;
+                   window.lastReadyForSubmitForm = {};
+                   window.lastReadyForSubmitForm.formData = formData;
+                   window.lastReadyForSubmitForm.url = url;
+                   window.lastReadyForSubmitForm.method = method;
+                   window.lastReadyForSubmitForm.el = el;
+                   //Trigger click to make modal open
+                   document.getElementById('vue-show-modal').click();
                },
 
                emitAlert: function () {
@@ -108,15 +134,17 @@
 
                submitAjaxRequest: function () {
                    var xmlhttp = new XMLHttpRequest();
+
                    xmlhttp.onreadystatechange = function() {
                        if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
                            if (xmlhttp.status == 200) {
                                document.getElementsByClassName('alert-message-bag')[0].innerHTML = xmlhttp.responseText;
                                if (xmlhttp.responseText !== '') {
-                                   this.emitAlert();
+                                   app.emitAlert();
                                }
                                else {
-                                   app.$emit('remove');
+//                                   console.log(document.getElementById('org0'));
+                                   simulateMouseEvent('dblclick', window.lastReadyForSubmitForm.el.closest('tr'), { ctrlKey: true })
                                }
                            }
                        }
@@ -124,6 +152,11 @@
 
                    xmlhttp.open(window.lastReadyForSubmitForm.method, window.lastReadyForSubmitForm.url, true);
                    xmlhttp.send(window.lastReadyForSubmitForm.formData);
+               },
+
+               deleteRow: function () {
+                   this.organizations[0] = false;
+                   console.log('deleted');
                }
            },
 
@@ -131,7 +164,8 @@
                return {
                    message: 'message',
                    showModal: false,
-                   organization: true
+                   organization: {"1": {"key": "value"}, "2": {"key": "value"}},
+                   organizations: Object.assign({}, JSON.parse(replaceQuotHTMLEntitiesWithDoubleQuotes("{{ $organizations }}")))
                }
            }
         });
@@ -147,6 +181,58 @@
             }
             this.className = newClassName;
         };
+
+        //Polyfill for closest() method
+        if (window.Element && !Element.prototype.closest) {
+            Element.prototype.closest =
+                function(s) {
+                    var matches = (this.document || this.ownerDocument).querySelectorAll(s),
+                        i,
+                        el = this;
+                    do {
+                        i = matches.length;
+                        while (--i >= 0 && matches.item(i) !== el) {};
+                    } while ((i < 0) && (el = el.parentElement));
+                    return el;
+                };
+        }
+
+        //Polyfill for Object.assign() like Object.assign({}, ['a','b','c']); // {0:"a", 1:"b", 2:"c"}
+        if (typeof Object.assign != 'function') {
+            Object.assign = function(target, varArgs) { // .length of function is 2
+                'use strict';
+                if (target == null) { // TypeError if undefined or null
+                    throw new TypeError('Cannot convert undefined or null to object');
+                }
+
+                var to = Object(target);
+
+                for (var index = 1; index < arguments.length; index++) {
+                    var nextSource = arguments[index];
+
+                    if (nextSource != null) { // Skip over if undefined or null
+                        for (var nextKey in nextSource) {
+                            // Avoid bugs when hasOwnProperty is shadowed
+                            if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+                                to[nextKey] = nextSource[nextKey];
+                            }
+                        }
+                    }
+                }
+                return to;
+            };
+        }
+
+        function simulateMouseEvent(eventName, element, options) {
+            options = options || {};
+            var event = new MouseEvent(eventName, options);
+
+            return element.dispatchEvent(event);
+        }
+        
+        function replaceQuotHTMLEntitiesWithDoubleQuotes(string) {
+            return string.replace(/&quot;/g, '\"')
+        }
 
         (function() {
             document.querySelector('.vue-hidden-container').removeClass('hidden');
