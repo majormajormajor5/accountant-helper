@@ -4,6 +4,15 @@
     Добавить организацию
 @endsection
 
+@section('header')
+    <div class="row">
+        <div class="col-sm-12">
+            <h3>Добавление организации</h3>
+            <br>
+        </div>
+    </div>
+@endsection
+
 @section('content')
     <div class="row">
         <div class="col-sm-12">

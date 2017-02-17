@@ -63,7 +63,9 @@ class OrganizationController extends Controller
      */
     public function show($id)
     {
-        //
+        $organization = Organization::findOrFail($id);
+
+        return view('organization.show', compact('organization'));
     }
 
     /**
@@ -89,8 +91,8 @@ class OrganizationController extends Controller
      */
     public function update(UpdateOrganizationRequest $request, $id)
     {
-        if (Organization::firstOrFail($id)->update($request->all())) {
-            return redirect('organization.index');
+        if (Organization::where('id', $id)->update($request->except(['_token', '_method', 'nothingChanged']))) {
+            return redirect('organizations');
         }
 
         return redirect()->back();

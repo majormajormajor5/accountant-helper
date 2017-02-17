@@ -16,28 +16,11 @@ class UpdateOrganizationRequest extends FormRequest
     public function authorize()
     {
         $id = $this->segment(count(request()->segments()));
-//        dd(Organization::where('id', $id)->exists());
-        $isAuthorized = !!Organization::where('id', $id)->exists();
-        if ($isAuthorized) {
+        if (Organization::where('id', $id)->where('user_id', Auth::user()->id)->exists()) {
             return true;
         }
 
         return false;
-//        return $isAuthorized;
-//        $org = Organization::where('id', 89);
-//        return !!$org;
-//        switch($this->method())
-//        {
-//            case 'POST':
-//            case 'PUT':
-//            case 'GET':
-//            case 'PATCH':
-//            case 'DELETE':
-//                return Organization::where('id', 89)->where('user_id', Auth::user()->id)->exists();
-//                break;
-//            default:
-//                break;
-//        }
     }
 
     /**
@@ -47,8 +30,10 @@ class UpdateOrganizationRequest extends FormRequest
      */
     public function rules()
     {
+        $id = $this->segment(count(request()->segments()));
+
         return [
-            'name' => 'required|unique:organizations|max:255'
+            'name' => 'required|unique:organizations,name,' . $id . '|max:255'
         ];
     }
 }

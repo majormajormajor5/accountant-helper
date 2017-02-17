@@ -3,6 +3,22 @@
 @section('title')
     Организации
 @endsection
+
+@section('header')
+    <div class="row">
+        <div class="col-sm-12">
+            <h3>Список организаций &nbsp;&nbsp; <a href="{{ url('organizations/create') }}" type="button" role="button" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-plus"></span>@desktop Добавить новую@enddesktop</a></h3>
+            <hr style="
+                        border: 0;
+                        height: 1px;
+                        background: #333;
+                        background-image: linear-gradient(to right, #ccc, #333, #ccc);
+                      "
+            >
+        </div>
+    </div>
+@endsection
+
 @section('content')
     <div class="row">
         <div class="col-sm-10">
@@ -15,43 +31,71 @@
                     <a href="{{ url('organizations/create') }}" class="btn btn-info"><span class="glyphicon glyphicon-plus"> </span> Добавить</a>
                 </div>
             @else
-                <table class="table table-hover table-striped table-responsive table-bordered">
+                <table class="table table-hover table-striped table-responsive">
                     <thead>
                         <tr>
                             <th>Имя организации</th>
-                            <th><a href="{{ url('organizations/create') }}" type="button" role="button" class="btn btn-info"><span class="glyphicon glyphicon-plus"></span>@desktop Добавить новую@enddesktop</a></th>
                             <th></th>
+                            {{--<th><a href="{{ url('organizations/create') }}" type="button" role="button" class="btn btn-info pull-right"><span class="glyphicon glyphicon-plus"></span>@desktop Добавить новую@enddesktop</a></th>--}}
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($organizations as $organization)
-{{--                            <tr v-if="organizations[{{ $loop->index . '' }}]" v-on:dblclick.ctrl="deleteRow" id="{{ 'org' . $loop->index }}">--}}
                             <tr v-if="organizations[{{ $loop->index . '' }}]" v-on:dblclick.ctrl="organizations[{{ $loop->index . '' }}] = false" id="{{ 'org' . $loop->index }}">
                                 <td style="word-break: break-all!important;">
-                                    {{ $organization->name }}
-                                </td>
-                                <td>
-                                    <a href="{{ url('organizations/' . $organization->id . '/edit') }}"
-                                       type="button"
-                                       role="button"
-                                       class="btn btn-info edit-button"
-                                    >
-                                        <span class="glyphicon glyphicon-edit"></span> @desktop Редактировать &nbsp; &nbsp; @enddesktop
+                                    <a href="{{ url('organizations/' . $organization->id) }}">
+                                        {{ $organization->name }}
                                     </a>
                                 </td>
                                 <td>
+                                    {{--<div class="row">--}}
+                                        {{--<div class="col-sm-7"></div>--}}
+                                        {{--<div class="col-sm-3">--}}
+                                            {{--<a href="{{ url('organizations/' . $organization->id . '/edit') }}"--}}
+                                               {{--type="button"--}}
+                                               {{--role="button"--}}
+                                               {{--class="btn btn-info edit-button"--}}
+                                            {{-->--}}
+                                                {{--<span class="glyphicon glyphicon-edit"></span> @desktop Редактировать &nbsp; &nbsp; @enddesktop--}}
+                                            {{--</a>--}}
+                                        {{--</div>--}}
+                                        {{--<div class="col-sm-2">--}}
+
+                                            {{--{!! Form::open(['url' => 'organizations/'. $organization->id,--}}
+                                                  {{--'method'=> 'DELETE',--}}
+                                                  {{--'@submit' => 'deleteOrganization'--}}
+                                                  {{--])--}}
+                                            {{--!!}--}}
+                                            {{--<button type="submit"--}}
+                                                    {{--role="button"--}}
+                                                    {{--class="btn btn-info"--}}
+                                            {{-->--}}
+                                                {{--<span class="glyphicon glyphicon-trash"></span>@desktop Удалить@enddesktop--}}
+                                            {{--</button>--}}
+                                            {{--{!! Form::close() !!}--}}
+
+                                        {{--</div>--}}
+                                    {{--</div>--}}
+
+
                                     {!! Form::open(['url' => 'organizations/'. $organization->id,
-                                                    'method'=> 'DELETE',
-                                                    '@submit' => 'deleteOrganization'
-                                                    ])
+                                          'method'=> 'DELETE',
+                                          '@submit' => 'deleteOrganization',
+                                          'style'=> 'display: inline;',
+                                          'class' => 'pull-right'
+                                          ])
                                     !!}
-                                        <button type="submit"
-                                                role="button"
-                                                class="btn btn-info"
-                                        >
-                                            <span class="glyphicon glyphicon-trash"></span>@desktop Удалить@enddesktop
-                                        </button>
+                                    <button type="submit"
+                                            role="button"
+                                            class="btn btn-info"
+                                    >
+                                        <span class="glyphicon glyphicon-trash"></span>@desktop Удалить@enddesktop
+                                    </button>
                                     {!! Form::close() !!}
+
+                                    <button  class="btn btn-info pull-right" style="margin-right: 0.2em" onclick="window.location = '{{ url('organizations/' . $organization->id . '/edit') }}'">
+                                        <span class="glyphicon glyphicon-edit"></span> @desktop Редактировать &nbsp; &nbsp; @enddesktop
+                                    </button>
                                 </td>
                             </tr>
                         @endforeach
@@ -106,7 +150,6 @@
 
            created: function () {
                bus.$on('modal-confirmed', this.submitAjaxRequest);
-               console.log(this.organizations);
            },
 
            methods: {
@@ -143,7 +186,6 @@
                                    app.emitAlert();
                                }
                                else {
-//                                   console.log(document.getElementById('org0'));
                                    simulateMouseEvent('dblclick', window.lastReadyForSubmitForm.el.closest('tr'), { ctrlKey: true })
                                }
                            }
@@ -156,7 +198,6 @@
 
                deleteRow: function () {
                    this.organizations[0] = false;
-                   console.log('deleted');
                }
            },
 
@@ -164,75 +205,10 @@
                return {
                    message: 'message',
                    showModal: false,
-                   organization: {"1": {"key": "value"}, "2": {"key": "value"}},
                    organizations: Object.assign({}, JSON.parse(replaceQuotHTMLEntitiesWithDoubleQuotes("{{ $organizations }}")))
                }
            }
         });
-
-        HTMLElement.prototype.removeClass = function(remove) {
-            var newClassName = "";
-            var i;
-            var classes = this.className.split(" ");
-            for(i = 0; i < classes.length; i++) {
-                if(classes[i] !== remove) {
-                    newClassName += classes[i] + " ";
-                }
-            }
-            this.className = newClassName;
-        };
-
-        //Polyfill for closest() method
-        if (window.Element && !Element.prototype.closest) {
-            Element.prototype.closest =
-                function(s) {
-                    var matches = (this.document || this.ownerDocument).querySelectorAll(s),
-                        i,
-                        el = this;
-                    do {
-                        i = matches.length;
-                        while (--i >= 0 && matches.item(i) !== el) {};
-                    } while ((i < 0) && (el = el.parentElement));
-                    return el;
-                };
-        }
-
-        //Polyfill for Object.assign() like Object.assign({}, ['a','b','c']); // {0:"a", 1:"b", 2:"c"}
-        if (typeof Object.assign != 'function') {
-            Object.assign = function(target, varArgs) { // .length of function is 2
-                'use strict';
-                if (target == null) { // TypeError if undefined or null
-                    throw new TypeError('Cannot convert undefined or null to object');
-                }
-
-                var to = Object(target);
-
-                for (var index = 1; index < arguments.length; index++) {
-                    var nextSource = arguments[index];
-
-                    if (nextSource != null) { // Skip over if undefined or null
-                        for (var nextKey in nextSource) {
-                            // Avoid bugs when hasOwnProperty is shadowed
-                            if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-                                to[nextKey] = nextSource[nextKey];
-                            }
-                        }
-                    }
-                }
-                return to;
-            };
-        }
-
-        function simulateMouseEvent(eventName, element, options) {
-            options = options || {};
-            var event = new MouseEvent(eventName, options);
-
-            return element.dispatchEvent(event);
-        }
-        
-        function replaceQuotHTMLEntitiesWithDoubleQuotes(string) {
-            return string.replace(/&quot;/g, '\"')
-        }
 
         (function() {
             document.querySelector('.vue-hidden-container').removeClass('hidden');

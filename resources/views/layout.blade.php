@@ -31,6 +31,7 @@
     <style>
         .vue-modal {
             position: fixed; /* Stay in place */
+            text-align: center;
             z-index: 1; /* Sit on top */
             padding-top: 100px; /* Location of the box */
             left: 0;
@@ -41,6 +42,7 @@
             background-color: rgb(0,0,0); /* Fallback color */
             background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
             transition: opacity .3s ease;
+            display: inline-block;
         }
 
         /* Modal Content */
@@ -57,8 +59,9 @@
             -webkit-animation-duration: 0.4s;
             animation-name: animatetop;
             transition: all .3s ease;
-            animation-duration: 0.4s
+            animation-duration: 0.4s;
         }
+
 
         .modal-mask {
             position: fixed;
@@ -215,12 +218,14 @@
 
 <div class="container">
     <div id="app">
+        @yield('header')
         @yield('content')
     </div>
     @yield('templates')
 </div>
 
 <script src="/js/app.js"></script>
+<script src="/js/my.js"></script>
 @yield('js')
 </body>
 </html>
