@@ -33,4 +33,5 @@ Route::get('logout', function () {
     return redirect('/');
 });
 
-Route::resource('organizations', 'Organization\OrganizationController');
+Route::resource('organizations', 'Organizations\OrganizationsController');
+Route::resource('buildings', 'BuildingsController');

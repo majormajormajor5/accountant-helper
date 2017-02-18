@@ -21,10 +21,10 @@
 
 @section('content')
     <div class="row">
-        <div class="col-sm-10">
+        <div class="col-sm-12">
             <alert-hidden id="my-alert"></alert-hidden>
-            <section ></section>
-            @if (!$organizations)
+            <section></section>
+            @if (empty($organizations->toArray()))
                 <div class="alert alert-warning alert-dismissable">
                     <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
                     <h4>У вас нет ни одной организации </h4>
@@ -103,7 +103,6 @@
                 </table>
             </div>
             @endif
-            <div class="col-sm-2"></div>
         </div>
 
         <button id="vue-show-modal" v-show="false" @click="showModal = true" class="hidden">Show Modal</button>

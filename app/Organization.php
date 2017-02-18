@@ -12,6 +12,11 @@ class Organization extends Model
 
     public function user()
     {
-        $this->belongsTo('App\User');
+        return $this->belongsTo('App\User');
+    }
+
+    public function buildings()
+    {
+        return $this->hasMany('App\Building');
     }
 }

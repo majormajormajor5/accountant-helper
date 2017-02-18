@@ -1,22 +1,21 @@
 <?php
 
-namespace App\Http\Controllers\Organization;
+namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreOrganization;
+use App\Building;
+use App\Http\Requests\StoreBuildingRequest;
+use App\Http\Requests\UpdateBuildingRequest;
 use App\Http\Requests\UpdateOrganizationRequest;
-use App\Organization;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Symfony\Component\HttpKernel\HttpCache\Store;
-use App\Http\Requests\StoreOrganizationRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
-class OrganizationController extends Controller
+class BuildingsController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth');
     }
+
     /**
      * Display a listing of the resource.
      *
@@ -24,9 +23,9 @@ class OrganizationController extends Controller
      */
     public function index()
     {
-        $organizations = Auth::user()->organizations()->get();
+        $buildings = Auth::user()->buildings()->get();
 
-        return view('organization.index', compact('organizations'));
+        return view('buildings.index', compact('buildings'));
     }
 
     /**
@@ -36,23 +35,23 @@ class OrganizationController extends Controller
      */
     public function create()
     {
-        $organization = new Organization();
+        $organizations = Auth::user()->organizations()->get()->pluck('name', 'id');
 
-        return view('organization.create', compact('organization'));
+        return view('buildings.create', compact('organizations'));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  StoreOrganizationRequest  $request
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreOrganizationRequest $request)
+    public function store(StoreBuildingRequest $request)
     {
         $request['user_id'] = Auth::user()->id;
-        Organization::create($request->all());
+        Building::create($request->all());
 
-        return redirect('organizations');
+        return redirect('buildings');
     }
 
     /**
@@ -63,9 +62,11 @@ class OrganizationController extends Controller
      */
     public function show($id)
     {
-        $organization = Organization::findOrFail($id);
+        $building = Building::where('id', $id)
+            ->where('user_id', Auth::user()->id)
+            ->firstOrFail();
 
-        return view('organization.show', compact('organization'));
+        return view('buildings.show', compact('building'));
     }
 
     /**
@@ -76,10 +77,13 @@ class OrganizationController extends Controller
      */
     public function edit($id)
     {
-        $organization = Organization::where('id', $id)
-            ->where('user_id', Auth::user()->id)->firstOrFail();
+        $building = Building::where('id', $id)
+            ->where('user_id', Auth::user()->id)
+            ->firstOrFail();
 
-        return view('organization.edit', compact('organization'));
+        $organizations = Auth::user()->organizations()->get()->pluck('name', 'id');
+
+        return view('buildings.edit', compact('building', 'organizations'));
     }
 
     /**
@@ -89,10 +93,10 @@ class OrganizationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateOrganizationRequest $request, $id)
+    public function update(UpdateBuildingRequest $request, $id)
     {
-        if (Organization::where('id', $id)->update($request->except(['_token', '_method', 'nothingChanged']))) {
-            return redirect('organizations');
+        if (Building::where('id', $id)->update($request->except(['_token', '_method']))) {
+            return redirect('buildings');
         }
 
         return redirect()->back();
@@ -106,10 +110,10 @@ class OrganizationController extends Controller
      */
     public function destroy($id)
     {
-        if (Organization::destroy($id)) {
+        if (Building::destroy($id)) {
             return response('', 200);
         }
 
-        return response(view('organization.partials.cannot-delete-alert'), 200);
+        return response(view('buildings.partials.cannot-delete-alert'), 200);
     }
 }
