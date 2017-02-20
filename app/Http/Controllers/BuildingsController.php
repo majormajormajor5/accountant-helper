@@ -110,10 +110,17 @@ class BuildingsController extends Controller
      */
     public function destroy($id)
     {
-        if (Building::destroy($id)) {
-            return response('', 200);
+        $building = Building::where('id', $id)
+            ->where('user_id', Auth::user()->id);
+
+        if ($building) {
+            if ($building->delete()) {
+                return response('', 200);
+            }
+
+            return response(view('buildings.partials.cannot-delete-alert'), 200);
         }
 
-        return response(view('buildings.partials.cannot-delete-alert'), 200);
+        return response('', 500);
     }
 }

@@ -19,4 +19,9 @@ class Building extends Model
     {
         return $this->belongsTo('App\User');
     }
+
+    public function apartments()
+    {
+        return $this->hasMany('App\Apartment');
+    }
 }

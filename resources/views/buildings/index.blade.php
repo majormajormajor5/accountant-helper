@@ -37,6 +37,7 @@
                         <th>Номер</th>
                         <th>Адресс</th>
                         <th>Организация</th>
+                        <th>Квартиры</th>
                         <th></th>
                     </tr>
                     </thead>
@@ -55,6 +56,9 @@
                                 <a href="{{ url('organizations/' . $building->organization->id) }}">
                                     {{ $building->organization->name }}
                                 </a>
+                            </td>
+                            <td>
+                                <a href="#">Квартиры</a>
                             </td>
                             <td>
                                 {!! Form::open(['url' => 'buildings/'. $building->id,
