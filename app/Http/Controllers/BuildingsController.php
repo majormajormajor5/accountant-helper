@@ -123,4 +123,12 @@ class BuildingsController extends Controller
 
         return response('', 500);
     }
+
+    public function apartments($buildingId)
+    {
+        $building = Building::findOrFail($buildingId);
+        $apartments = $building->apartments;
+
+        return view('apartments.index', compact('building', 'apartments'));
+    }
 }

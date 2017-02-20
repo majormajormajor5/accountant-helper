@@ -2,10 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Apartment;
+use App\Building;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreApartmentRequest;
 
 class ApartmentsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -21,9 +30,11 @@ class ApartmentsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create($buildingId)
     {
-        //
+        $buildings = Building::where('user_id', Auth::user()->id)->get()->pluck('name', 'id');
+
+        return view('apartments.create', compact('buildings', 'buildingId'));
     }
 
     /**
@@ -32,9 +43,10 @@ class ApartmentsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreApartmentRequest $request, $buildingId)
     {
-        //
+        $data = $request->all();
+
     }
 
     /**

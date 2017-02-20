@@ -107,10 +107,17 @@ class OrganizationsController extends Controller
      */
     public function destroy($id)
     {
-        if (Organization::destroy($id)) {
-            return response('', 200);
+        $organization = Organization::where('id', $id)
+            ->where('user_id', Auth::user()->id);
+
+        if ($organization) {
+            if ($organization->delete()) {
+                return response('', 200);
+            }
+
+            return response(view('organization.partials.cannot-delete-alert'), 200);
         }
 
-        return response(view('organization.partials.cannot-delete-alert'), 200);
+        return response('unauthorized', 200);
     }
 }
