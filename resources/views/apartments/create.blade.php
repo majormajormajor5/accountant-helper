@@ -53,22 +53,16 @@
                     <input v-model="apartments.quantity" type="number" name="quantity" class="form-control" id="quantity" placeholder="Сколько вы хотите добавить" required>
                 </div>
             </div>
-            <div class="form-group" v-show="! isMoreThanOne()">
+            <div class="form-group" v-if="! isMoreThanOne()">
                 <label class="control-label col-sm-2" for="name">Номер:</label>
                 <div class="col-sm-10">
                         <input type="text" name="number" class="form-control" id="number" placeholder="Какой номер присвоить квартире">
                 </div>
             </div>
-            <div class="form-group" v-show="isMoreThanOne()">
+            <div class="form-group" v-else>
                 <label class="control-label col-sm-2" for="name">C номера:</label>
                 <div class="col-sm-10">
                         <input type="text" name="fromNumber" class="form-control" id="fromNumber" placeholder="С какого номера включительно">
-                </div>
-            </div>
-            <div class="form-group" v-show="isMoreThanOne()">
-                <label class="control-label col-sm-2" for="name">По номер:</label>
-                <div class="col-sm-10">
-                        <input type="text" name="toNumber" class="form-control" id="toNumber" placeholder="По какой номер включительно">
                 </div>
             </div>
             <div class="form-group">

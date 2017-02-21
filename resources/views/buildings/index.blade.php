@@ -58,7 +58,7 @@
                                 </a>
                             </td>
                             <td>
-                                <a href="{{ url('apartments') }}">Квартиры</a>
+                                <a href="{{ url('buildings/' . $building->id . '/apartments') }}">Квартиры</a>
                             </td>
                             <td>
                                 {!! Form::open(['url' => 'buildings/'. $building->id,

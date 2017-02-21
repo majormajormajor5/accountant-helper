@@ -32,7 +32,6 @@ class StoreBuildingRequest extends FormRequest
                 Rule::exists('organizations', 'id')->where(function ($query) {
                 $query->where('user_id', Auth::user()->id);
             })]
-
         ];
     }
 }

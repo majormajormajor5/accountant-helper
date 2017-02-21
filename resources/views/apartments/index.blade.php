@@ -7,7 +7,12 @@
 @section('header')
     <div class="row">
         <div class="col-sm-12">
-            <h3>Список квартир дома {{ $building->name }} организации {{ $building->organization->name }}</h3>
+            <h3>Список квартир дома {{ $building->name }} организации {{ $building->organization->name }}
+                <a href="{{ url('apartments/building/'. $building->id . '/create') }}" type="button" role="button" class="btn btn-info btn-sm">
+                    <span class="glyphicon glyphicon-plus"></span>
+                    @desktop Добавить@enddesktop
+                </a>
+            </h3>
             <hr style="
                         border: 0;
                         height: 1px;
@@ -42,46 +47,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {{--@foreach ($buildings as $building)--}}
-                        {{--<tr v-if="buildings[{{ $loop->index . '' }}]" v-on:dblclick.ctrl="buildings[{{ $loop->index . '' }}] = false" id="{{ 'org' . $loop->index }}">--}}
-                            {{--<td style="word-break: break-all!important;">--}}
-                                {{--<a href="{{ url('buildings/' . $building->id) }}">--}}
-                                    {{--{{ $building->name }}--}}
-                                {{--</a>--}}
-                            {{--</td>--}}
-                            {{--<td style="word-break: break-all!important;">--}}
-                                {{--{{ $building->address }}--}}
-                            {{--</td>--}}
-                            {{--<td style="word-break: break-all!important;">--}}
-                                {{--<a href="{{ url('organizations/' . $building->organization->id) }}">--}}
-                                    {{--{{ $building->organization->name }}--}}
-                                {{--</a>--}}
-                            {{--</td>--}}
-                            {{--<td>--}}
-                                {{--<a href="{{ url('apartments') }}">Квартиры</a>--}}
-                            {{--</td>--}}
-                            {{--<td>--}}
-                                {{--{!! Form::open(['url' => 'buildings/'. $building->id,--}}
-                                      {{--'method'=> 'DELETE',--}}
-                                      {{--'@submit' => 'deleteOrganization',--}}
-                                      {{--'style'=> 'display: inline;',--}}
-                                      {{--'class' => 'pull-right'--}}
-                                      {{--])--}}
-                                {{--!!}--}}
-                                {{--<button type="submit"--}}
-                                        {{--role="button"--}}
-                                        {{--class="btn btn-info"--}}
-                                {{-->--}}
-                                    {{--<span class="glyphicon glyphicon-trash"></span>@desktop Удалить@enddesktop--}}
-                                {{--</button>--}}
-                                {{--{!! Form::close() !!}--}}
 
-                                {{--<button  class="btn btn-info pull-right" style="margin-right: 0.2em" onclick="window.location = '{{ url('buildings/' . $building->id . '/edit') }}'">--}}
-                                    {{--<span class="glyphicon glyphicon-edit"></span> @desktop Редактировать &nbsp; &nbsp; @enddesktop--}}
-                                {{--</button>--}}
-                            {{--</td>--}}
-                        {{--</tr>--}}
-                    {{--@endforeach--}}
                     </tbody>
                 </table>
         </div>

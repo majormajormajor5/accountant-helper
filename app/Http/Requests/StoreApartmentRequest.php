@@ -28,8 +28,7 @@ class StoreApartmentRequest extends FormRequest
         return [
 //            'building_id' => 'required|integer',
             'quantity' => 'required|integer|min:1|max:300',
-            'number' => 'required_without_all:toNumber,fromNumber',
-            'toNumber' => 'required_without_all:number',
+            'number' => 'required_without_all:fromNumber',
             'fromNumber' => 'required_without_all:number',
             'buildingId' => ['required',
                 Rule::exists('buildings', 'id')->where(function ($query) {

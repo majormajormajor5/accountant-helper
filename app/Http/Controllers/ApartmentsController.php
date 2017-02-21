@@ -10,6 +10,8 @@ use App\Http\Requests\StoreApartmentRequest;
 
 class ApartmentsController extends Controller
 {
+    public $bulk = [];
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -46,6 +48,35 @@ class ApartmentsController extends Controller
     public function store(StoreApartmentRequest $request, $buildingId)
     {
         $data = $request->all();
+
+        if (isset($data['fromNumber'])) {
+            $data['toNumber'] = abs($data['fromNumber']) + abs($data['quantity']);
+
+            $apartments = [];
+            for ($i = (int) $data['fromNumber']; $i < $data['toNumber']; $i++) {
+                $apartment = [];
+                $apartment['number'] = $i;
+                $apartment['square'] = 0.0000;
+                $apartment['number_of_residents'] = 1;
+                $apartment['building_id'] = $buildingId;
+                $apartment['created_at'] = 'now';
+                $apartment['updated_at'] = 'now';
+
+                $apartments[] = $apartment;
+            }
+
+            Apartment::insert($apartments);
+
+        } else {
+            $apartment = [];
+            $apartment['number'] = $data['number'];
+            $apartment['square'] = 0.0000;
+            $apartment['number_of_residents'] = 1;
+            $apartment['building_id'] = $buildingId;
+
+            Apartment::create($apartment);
+        }
+
 
     }
 
@@ -92,5 +123,32 @@ class ApartmentsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function makeBulk()
+    {
+        $res = [];
+
+        function make(&$result) {
+            $bulkData = [];
+            $counter = 1;
+            $apartments = [];
+            for ($i = 1; $i < 5; $i++) {
+                $apartment = [];
+                $apartment['number'] = $i;
+                $apartment['square'] = 0.0000;
+                $apartment['number_of_residents'] = 1;
+                $apartment['building_id'] = 12;
+
+//            $bulkData[] = $apartment;
+
+                $result = $result + array_merge($bulkData, $apartment);
+            }
+
+            var_dump($result);
+        }
+        make($res);
+        var_dump($res);
+        die;
     }
 }
