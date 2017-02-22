@@ -59,6 +59,7 @@ class ApartmentsController extends Controller
                 $apartment['square'] = 0.0000;
                 $apartment['number_of_residents'] = 1;
                 $apartment['building_id'] = $buildingId;
+                $apartment['user_id'] = Auth::user()->id;
                 $apartment['created_at'] = 'now';
                 $apartment['updated_at'] = 'now';
 
@@ -73,11 +74,12 @@ class ApartmentsController extends Controller
             $apartment['square'] = 0.0000;
             $apartment['number_of_residents'] = 1;
             $apartment['building_id'] = $buildingId;
+            $apartment['user_id'] = Auth::user()->id;
 
             Apartment::create($apartment);
         }
 
-
+        return redirect('buildings/' . $buildingId . '/apartments');
     }
 
     /**

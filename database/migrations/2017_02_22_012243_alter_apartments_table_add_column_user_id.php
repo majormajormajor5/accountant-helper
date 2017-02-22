@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AlterApartmentsTableAddColumnBuildingId extends Migration
+class AlterApartmentsTableAddColumnUserId extends Migration
 {
     /**
      * Run the migrations.
@@ -14,8 +14,8 @@ class AlterApartmentsTableAddColumnBuildingId extends Migration
     public function up()
     {
         Schema::table('apartments', function ($table) {
-            $table->unsignedBigInteger('building_id');
-            $table->foreign('building_id')->references('id')->on('buildings')->onDelete('cascade')->onUpdate('cascade');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
@@ -27,8 +27,8 @@ class AlterApartmentsTableAddColumnBuildingId extends Migration
     public function down()
     {
         Schema::table('apartments', function($table) {
-            $table->dropForeign('apartments_building_id_foreign');
-            $table->dropColumn('building_id');
+            $table->dropForeign('apartments_user_id_foreign');
+            $table->dropColumn('user_id');
         });
     }
 }

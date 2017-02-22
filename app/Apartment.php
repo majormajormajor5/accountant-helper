@@ -14,4 +14,9 @@ class Apartment extends Model
     {
         return $this->belongsTo('App\Building');
     }
+
+    public function user()
+    {
+        return $this->belongsTo('App\User');
+    }
 }

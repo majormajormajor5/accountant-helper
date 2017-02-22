@@ -36,18 +36,46 @@
                     <a href="{{ url('apartments/building/' . $building->id . '/create') }}" class="btn btn-info"><span class="glyphicon glyphicon-plus"> </span> Добавить</a>
                 </div>
             @else
-                <table class="table table-hover table-striped table-responsive">
+                <table class="table table-hover table-striped table-responsive" id="mytable">
                     <thead>
                     <tr>
-                        <th>Номер</th>
-                        <th>Адресс</th>
-                        <th>Организация</th>
-                        <th>Квартиры</th>
-                        <th></th>
+                        <th id="number">Номер</th>
+                        <th id="owner">Владелец</th>
+                        <th id="square">Площадь</th>
+                        <th id="number_of_residents">Количество проживающих</th>
                     </tr>
                     </thead>
                     <tbody>
+                    @foreach ($apartments as $apartment)
+                        {{--<tr>--}}
+                            {{--<td>--}}
+                                {{--{{ $apartment->number }}--}}
+                            {{--</td>--}}
+                            {{--<td>--}}
 
+                            {{--</td>--}}
+                            {{--<td>--}}
+                                {{--{{ $apartment->square }}--}}
+                            {{--</td>--}}
+                            {{--<td>--}}
+                                {{--{{ $apartment->number_of_residents }}--}}
+                            {{--</td>--}}
+                        {{--</tr>                        --}}
+                        <tr>
+                            <td>
+                                <input @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $apartment->number }}" id="{{ $apartment->id }}">
+                            </td>
+                            <td>
+
+                            </td>
+                            <td>
+                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $apartment->square }}" id="{{ $apartment->id }}">
+                            </td>
+                            <td>
+                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $apartment->number_of_residents }}" id="{{ $apartment->id }}">
+                            </td>
+                        </tr>
+                    @endforeach
                     </tbody>
                 </table>
         </div>
@@ -72,7 +100,41 @@
         var bus = new Vue;
 
         var app = new Vue({
-            el: '#app'
+            el: '#app',
+
+            data: function () {
+                return {
+                    showModal: false
+                }
+            },
+
+            methods: {
+                checkChanges: function (e) {
+                    var value = e.target.value;
+
+                    if (value == this.lastElementValue) {
+                        return console.log('no');
+                    }
+
+                    return console.log('changed');
+                },
+
+                writeValue: function (e) {
+                    var el = e.target;
+                    var apartmentId = el.id;
+                    var cell = el.parentNode;
+
+                    var x = cell.cellIndex;
+                    var y = cell.parentNode.rowIndex;
+                    columnName = document.getElementById("mytable").rows[0].cells.item(x).id;
+                    console.log(apartmentId);
+                    this.lastElementValue = el.value;
+                }, 
+                
+                ajaxRequest: function () {
+
+                }
+            }
         });
     </script>
 @endsection
