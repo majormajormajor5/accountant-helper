@@ -39,3 +39,4 @@ Route::resource('buildings', 'BuildingsController');
 Route::get('buildings/{id}/apartments', 'BuildingsController@apartments');
 Route::get('apartments/building/{buildingId}/create', 'ApartmentsController@create');
 Route::post('apartments/building/{buildingId}', 'ApartmentsController@store');
+Route::post('apartments/{apartmentId}/update', 'ApartmentsController@update');

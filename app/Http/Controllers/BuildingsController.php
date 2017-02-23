@@ -127,7 +127,7 @@ class BuildingsController extends Controller
     public function apartments($buildingId)
     {
         $building = Building::findOrFail($buildingId);
-        $apartments = $building->apartments;
+        $apartments = $building->apartments->sortBy('number');
 
         return view('apartments.index', compact('building', 'apartments'));
     }

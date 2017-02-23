@@ -14,7 +14,8 @@
         data: function () {
             return {
                 show: false,
-                bus: new Vue()
+                bus: new Vue(),
+                message: true
             }
         },
 
@@ -25,11 +26,22 @@
 
             toggle: function () {
                 this.show = true;
+            },
+
+            hide: function () {
+                this.show = false;
+                this.message = false;
+            },
+
+            open: function () {
+                this.message = true;
             }
         },
 
         created: function() {
             bus.$on('new-message', this.toggle);
+            bus.$on('close', this.hide);
+            bus.$on('open', this.open);
         }
     }
 </script>

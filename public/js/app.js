@@ -12173,7 +12173,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     data: function data() {
         return {
             show: false,
-            bus: new Vue()
+            bus: new Vue(),
+            message: true
         };
     },
 
@@ -12184,11 +12185,22 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
         toggle: function toggle() {
             this.show = true;
+        },
+
+        hide: function hide() {
+            this.show = false;
+            this.message = false;
+        },
+
+        open: function open() {
+            this.message = true;
         }
     },
 
     created: function created() {
         bus.$on('new-message', this.toggle);
+        bus.$on('close', this.hide);
+        bus.$on('open', this.open);
     }
 };
 

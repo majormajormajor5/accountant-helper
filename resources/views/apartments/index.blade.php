@@ -47,20 +47,6 @@
                     </thead>
                     <tbody>
                     @foreach ($apartments as $apartment)
-                        {{--<tr>--}}
-                            {{--<td>--}}
-                                {{--{{ $apartment->number }}--}}
-                            {{--</td>--}}
-                            {{--<td>--}}
-
-                            {{--</td>--}}
-                            {{--<td>--}}
-                                {{--{{ $apartment->square }}--}}
-                            {{--</td>--}}
-                            {{--<td>--}}
-                                {{--{{ $apartment->number_of_residents }}--}}
-                            {{--</td>--}}
-                        {{--</tr>                        --}}
                         <tr>
                             <td>
                                 <input @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $apartment->number }}" id="{{ $apartment->id }}">
@@ -104,37 +90,79 @@
 
             data: function () {
                 return {
-                    showModal: false
+                    showModal: false,
+                    message: 'message'
                 }
             },
 
             methods: {
+
+                emitAlert: function () {
+                    bus.$emit('new-message', this.message);
+                },
+
+                emitClose: function () {
+                    bus.$emit('close', this.message);
+                },
+
                 checkChanges: function (e) {
-                    var value = e.target.value;
+                    var el = e.target;
+                    var newValue = e.target.value;
 
-                    if (value == this.lastElementValue) {
-                        return console.log('no');
+                    if (newValue !== this.lastElementValue) {
+                        var apartmentId = el.id;
+                        var cell = el.parentNode;
+
+                        var x = cell.cellIndex;
+                        var columnName = document.getElementById("mytable").rows[0].cells.item(x).id;
+
+                        this.submitAjaxRequest(apartmentId, columnName, newValue, el, this.lastElementValue);
                     }
-
-                    return console.log('changed');
                 },
 
                 writeValue: function (e) {
                     var el = e.target;
-                    var apartmentId = el.id;
-                    var cell = el.parentNode;
-
-                    var x = cell.cellIndex;
-                    var y = cell.parentNode.rowIndex;
-                    columnName = document.getElementById("mytable").rows[0].cells.item(x).id;
-                    console.log(apartmentId);
                     this.lastElementValue = el.value;
                 }, 
                 
-                ajaxRequest: function () {
+                submitAjaxRequest: function (apartmentId, columnName, value, el, oldValue) {
+                    var xmlhttp = new XMLHttpRequest();
 
+                    xmlhttp.onreadystatechange = function() {
+                        if (document.getElementsByClassName('alert-message-bag')[0].innerHTML != '') {
+                            app.emitClose();
+                        }
+
+                        if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+                            if (xmlhttp.status == 200) {
+                                var response = JSON.parse(xmlhttp.responseText);
+                                if (! response.success) {
+                                    app.emitAlert();
+                                    window.lastAJAXContainedErrors = true;
+//                                    console.log(window.lastAJAXContainedErrors);
+                                    document.getElementsByClassName('alert-message-bag')[0].innerHTML = '';
+                                    for (var key in response.errors) {
+                                        document.getElementsByClassName('alert-message-bag')[0].innerHTML += '<p>' + response.errors[key] + '</p>';
+                                    }
+
+                                    el.value = oldValue;
+                                } else {
+                                    window.lastAJAXContainedErrors = false;
+                                }
+                            }
+                        }
+                    };
+
+                    xmlhttp.open('POST', "{{ url('apartments') }}" + '/' + apartmentId + '/update', true);
+                    xmlhttp.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
+                    xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    xmlhttp.send("apartmentId=" + apartmentId + "&columnName=" + columnName + "&value=" + value);
                 }
             }
         });
+
+        (function() {
+            document.querySelector('.vue-hidden-container').removeClass('hidden');
+        })();
     </script>
 @endsection

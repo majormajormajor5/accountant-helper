@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Apartment;
 use App\Building;
+use App\Http\Requests\UpdateApartmentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreApartmentRequest;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Response;
 
 class ApartmentsController extends Controller
 {
@@ -60,6 +63,7 @@ class ApartmentsController extends Controller
                 $apartment['number_of_residents'] = 1;
                 $apartment['building_id'] = $buildingId;
                 $apartment['user_id'] = Auth::user()->id;
+                $apartment['owners_email'] = '';
                 $apartment['created_at'] = 'now';
                 $apartment['updated_at'] = 'now';
 
@@ -75,6 +79,7 @@ class ApartmentsController extends Controller
             $apartment['number_of_residents'] = 1;
             $apartment['building_id'] = $buildingId;
             $apartment['user_id'] = Auth::user()->id;
+            $apartment['owners_email'] = '';
 
             Apartment::create($apartment);
         }
@@ -111,9 +116,32 @@ class ApartmentsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        //
+        $rules = [
+            'user_id' => 'not_present',
+            'number_of_residents' => 'integer',
+            'square' => ['regex:/^[0-9]{1,6}\.[0-9]{0,4}$/']
+        ];
+
+        $dataForValidation = [$request['columnName'] => $request['value']];
+        $validator = Validator::make($dataForValidation, $rules);
+
+        // Validate the input and return correct response
+        if ($validator->fails())
+        {
+            return Response::json(array(
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+
+            ), 200);
+        }
+
+        Apartment::where('id', $request['apartmentId'])
+            ->where('user_id', Auth::user()->id)
+            ->update([$request['columnName'] => $request['value']]);
+
+        return Response::json(array('success' => true), 200);
     }
 
     /**
@@ -125,32 +153,5 @@ class ApartmentsController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-    public function makeBulk()
-    {
-        $res = [];
-
-        function make(&$result) {
-            $bulkData = [];
-            $counter = 1;
-            $apartments = [];
-            for ($i = 1; $i < 5; $i++) {
-                $apartment = [];
-                $apartment['number'] = $i;
-                $apartment['square'] = 0.0000;
-                $apartment['number_of_residents'] = 1;
-                $apartment['building_id'] = 12;
-
-//            $bulkData[] = $apartment;
-
-                $result = $result + array_merge($bulkData, $apartment);
-            }
-
-            var_dump($result);
-        }
-        make($res);
-        var_dump($res);
-        die;
     }
 }
