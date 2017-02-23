@@ -152,6 +152,17 @@ class ApartmentsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $apartment = Apartment::where('id', $id)
+            ->where('user_id', Auth::user()->id);
+
+        if ($apartment) {
+            if ($apartment->delete()) {
+                return response('', 200);
+            }
+
+            return response(view('apartments.partials.cannot-delete-alert'), 200);
+        }
+
+        return response('', 500);
     }
 }

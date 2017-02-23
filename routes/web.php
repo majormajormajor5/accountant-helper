@@ -40,3 +40,4 @@ Route::get('buildings/{id}/apartments', 'BuildingsController@apartments');
 Route::get('apartments/building/{buildingId}/create', 'ApartmentsController@create');
 Route::post('apartments/building/{buildingId}', 'ApartmentsController@store');
 Route::post('apartments/{apartmentId}/update', 'ApartmentsController@update');
+Route::delete('apartments/{apartmentId}', 'ApartmentsController@destroy');
