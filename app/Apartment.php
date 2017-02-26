@@ -19,4 +19,9 @@ class Apartment extends Model
     {
         return $this->belongsTo('App\User');
     }
+
+    public function owners()
+    {
+        return $this->belongsToMany('App\Owner');
+    }
 }

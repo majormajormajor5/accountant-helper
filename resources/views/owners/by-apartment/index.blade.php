@@ -1,17 +1,14 @@
 @extends('layout')
 
 @section('title')
-    Дома
+    Владельцы квартиры {{ $apartment->number }} дома {{ $apartment->building->name }} организации {{ $apartment->building->organization->name }}
 @endsection
 
 @section('header')
     <div class="row">
         <div class="col-sm-12">
-            <h3>Список квартир дома {{ $building->name }} организации {{ $building->organization->name }}
-                <a href="{{ url('apartments/building/'. $building->id . '/create') }}" type="button" role="button" class="btn btn-info btn-sm">
-                    <span class="glyphicon glyphicon-plus"></span>
-                    @desktop Добавить@enddesktop
-                </a>
+            <h3>
+                Владельцы квартиры номер {{ $apartment->number }} дома {{ $apartment->building->name }} организации {{ $apartment->building->organization->name }}
             </h3>
             <hr style="
                         border: 0;
@@ -25,45 +22,50 @@
 @endsection
 
 @section('content')
+    <button @click="addOwner">add+</button>
     <div class="row">
         <div class="col-sm-12">
             <alert-hidden id="my-alert"></alert-hidden>
             <section></section>
-            @if (empty($apartments->toArray()))
+            @if (empty($owners->toArray()))
                 <div class="alert alert-warning alert-dismissable">
                     <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
                     <h4>У данного дома пока нет квартир </h4>
-                    <a href="{{ url('apartments/apartment/' . $apartment->id . '/create') }}" class="btn btn-info"><span class="glyphicon glyphicon-plus"> </span> Добавить</a>
+                    <a href="{{ url('owners/create') }}" class="btn btn-info"><span class="glyphicon glyphicon-plus"> </span> Добавить</a>
                 </div>
             @else
                 <table class="table table-hover table-striped table-responsive" id="mytable">
                     <thead>
                     <tr>
-                        <th id="number">Номер</th>
-                        <th id="owner">Владелец</th>
-                        <th id="square">Площадь</th>
-                        <th id="number_of_residents">Количество проживающих</th>
+                        <th id="second_name">Фамилия</th>
+                        <th id="first_name">Имя</th>
+                        <th id="patronymic">Отчество</th>
+                        <th id="email">email</th>
+                        <th id="phone">Телефон</th>
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach ($apartments as $apartment)
-                        <tr v-if="apartments[{{ $loop->index . '' }}]" v-on:dblclick.ctrl="apartments[{{ $loop->index . '' }}] = false">
+                    @foreach ($owners as $owner)
+                        <tr v-if="owners[{{ $loop->index . '' }}]" v-on:dblclick.ctrl="owners[{{ $loop->index . '' }}] = false">
                             <td>
-                                <input @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $apartment->number }}" id="{{ $apartment->id }}">
+                                <input @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $owner->second_name }}" id="{{ $owner->id }}">
                             </td>
                             <td>
-                                <a href="{{ url('owners/apartment/' . $apartment->id) }}">Владельцы</a>
+                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $owner->first_name }}" id="{{ $owner->id }}">
                             </td>
                             <td>
-                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $apartment->square }}" id="{{ $apartment->id }}">
+                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $owner->patronymic }}" id="{{ $owner->id }}">
                             </td>
                             <td>
-                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $apartment->number_of_residents }}" id="{{ $apartment->id }}">
+                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $owner->email }}" id="{{ $owner->id }}">
                             </td>
                             <td>
-                                {!! Form::open(['url' => 'apartments/'. $apartment->id,
+                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $owner->phone }}" id="{{ $owner->id }}">
+                            </td>
+                            <td>
+                                {!! Form::open(['url' => 'owners/'. $owner->id,
                                       'method'=> 'DELETE',
-                                      '@submit' => 'deleteOrganization',
+                                      '@submit' => 'deleteOwner',
                                       'style'=> 'display: inline;',
                                       'class' => 'pull-right'
                                       ])
@@ -73,13 +75,44 @@
                                         class="btn btn-info"
                                 >
                                     <span class="glyphicon glyphicon-trash"></span>
-                                    {{--@desktop Удалить@enddesktop--}}
                                 </button>
                                 {!! Form::close() !!}
-
                             </td>
                         </tr>
                     @endforeach
+                    <tr v-for="(additionalRow, index) in additionalRows">
+                        <td>
+                            <input @focusout="checkChanges" @focusin="writeValue" type="text" value="" id="">
+                        </td>
+                        <td>
+                            <input @focusout="checkChanges" @focusin="writeValue" type="text" value="" id="">
+                        </td>
+                        <td>
+                            <input @focusout="checkChanges" @focusin="writeValue" type="text" value="" id="">
+                        </td>
+                        <td>
+                            <input @focusout="checkChanges" @focusin="writeValue" type="text" value="" id="">
+                        </td>
+                        <td>
+                            <input @focusout="checkChanges" @focusin="writeValue" type="text" value="" id="">
+                        </td>
+                        <td>
+                            {!! Form::open(['url' => 'owners/'. 1,
+                                  'method'=> 'DELETE',
+                                  '@submit' => 'deleteOwner',
+                                  'style'=> 'display: inline;',
+                                  'class' => 'pull-right'
+                                  ])
+                            !!}
+                            <button type="submit"
+                                    role="button"
+                                    class="btn btn-info"
+                            >
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </button>
+                            {!! Form::close() !!}
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
         </div>
@@ -94,7 +127,7 @@
           you can use custom content here to overwrite
           default content
         -->
-        <h4 slot="body">Вы точно хотите удалить эту квартиру?</h4>
+        <h4 slot="body">Вы точно хотите удалить этого владельца ?</h4>
         </vue-modal>
     </div>
 @endsection
@@ -114,7 +147,8 @@
                 return {
                     showModal: false,
                     message: 'message',
-                    apartments: Object.assign({}, JSON.parse(replaceQuotHTMLEntitiesWithDoubleQuotes("{{ $apartments }}")))
+                    owners: Object.assign({}, JSON.parse(replaceQuotHTMLEntitiesWithDoubleQuotes("{{ $owners }}"))),
+                    additionalRows: ['', '']
                 }
             },
 
@@ -133,22 +167,22 @@
                     var newValue = e.target.value;
 
                     if (newValue !== this.lastElementValue) {
-                        var apartmentId = el.id;
+                        var ownerId = el.id;
                         var cell = el.parentNode;
 
                         var x = cell.cellIndex;
                         var columnName = document.getElementById("mytable").rows[0].cells.item(x).id;
 
-                        this.submitAjaxRequest(apartmentId, columnName, newValue, el, this.lastElementValue);
+                        this.submitAjaxRequest(ownerId, columnName, newValue, el, this.lastElementValue);
                     }
                 },
 
                 writeValue: function (e) {
                     var el = e.target;
                     this.lastElementValue = el.value;
-                }, 
-                
-                submitAjaxRequest: function (apartmentId, columnName, value, el, oldValue) {
+                },
+
+                submitAjaxRequest: function (ownerId, columnName, value, el, oldValue) {
                     var xmlhttp = new XMLHttpRequest();
 
                     xmlhttp.onreadystatechange = function() {
@@ -176,13 +210,13 @@
                         }
                     };
 
-                    xmlhttp.open('POST', "{{ url('apartments') }}" + '/' + apartmentId + '/update', true);
+                    xmlhttp.open('POST', "{{ url('owners') }}" + '/' + ownerId + '/update', true);
                     xmlhttp.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
                     xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                    xmlhttp.send("apartmentId=" + apartmentId + "&columnName=" + columnName + "&value=" + value);
+                    xmlhttp.send("ownerId=" + ownerId + "&columnName=" + columnName + "&value=" + value);
                 },
 
-                deleteOrganization: function (e) {
+                deleteOwner: function (e) {
                     e.preventDefault();
                     var el = e.target;
                     var button = el.querySelector('button[type="submit"]');
@@ -219,6 +253,10 @@
 
                     xmlhttp.open(window.lastReadyForSubmitForm.method, window.lastReadyForSubmitForm.url, true);
                     xmlhttp.send(window.lastReadyForSubmitForm.formData);
+                },
+
+                addOwner: function () {
+                    this.additionalRows.unshift({text: 'sometext'});
                 }
             }
         });
@@ -228,3 +266,4 @@
         })();
     </script>
 @endsection
+

@@ -34,10 +34,16 @@ Route::get('logout', function () {
 });
 
 Route::resource('organizations', 'Organizations\OrganizationsController');
+
 Route::resource('buildings', 'BuildingsController');
-//Route::resource('apartments', 'ApartmentsController');
+
 Route::get('buildings/{id}/apartments', 'BuildingsController@apartments');
 Route::get('apartments/building/{buildingId}/create', 'ApartmentsController@create');
 Route::post('apartments/building/{buildingId}', 'ApartmentsController@store');
 Route::post('apartments/{apartmentId}/update', 'ApartmentsController@update');
 Route::delete('apartments/{apartmentId}', 'ApartmentsController@destroy');
+
+Route::get('owners/apartment/{apartmentId}', 'OwnersController@byApartment');
+Route::post('owners/{ownerId}/update', 'OwnersController@update');
+Route::delete('owners/{ownerId}', 'OwnersController@destroy');
+Route::post('owners/create');
