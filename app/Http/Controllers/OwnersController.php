@@ -44,7 +44,6 @@ class OwnersController extends Controller
      */
     public function store(Request $request)
     {
-//        return $request['apartmentId'];
         $rules = [
             'user_id' => 'not_present'
         ];
@@ -68,8 +67,8 @@ class OwnersController extends Controller
             'email' => '',
             'phone' => '',
             'user_id'=> Auth::user()->id,
-            'created_at' => 'now()',
-            'updated_at' => 'now()'
+            'created_at' => 'now',
+            'updated_at' => 'now'
         ]);
 
         $createdOwner = Apartment::where('id', $request['apartmentId'])
@@ -134,7 +133,10 @@ class OwnersController extends Controller
 
         Owner::where('id', $request['ownerId'])
             ->where('user_id', Auth::user()->id)
-            ->update([$request['columnName'] => $request['value']]);
+            ->update([
+                $request['columnName'] => $request['value'],
+                'updated_at' => 'now'
+            ]);
 
         return Response::json(array('success' => true), 200);
     }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Apartment;
 use App\Building;
 use App\Http\Requests\UpdateApartmentRequest;
+use App\Month;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreApartmentRequest;
@@ -72,6 +74,25 @@ class ApartmentsController extends Controller
 
             Apartment::insert($apartments);
 
+            $apartments = Apartment::where('building_id', $buildingId)->pluck('id')->toArray();
+
+            $months = [];
+            foreach ($apartments as $apartment) {
+                $month = [];
+                $month['month'] = Carbon::now()->startOfMonth()->format('Y-m-d');
+                $month['beginning_sum'] = 0;
+                $month['ending_sum'] = 0;
+                $month['balance'] = 0;
+                $month['taxes'] = '{}';
+                $month['created_at'] = 'now';
+                $month['updated_at'] = 'now';
+                $month['apartment_id'] = $apartment;
+                $month['building_id'] = $buildingId;
+                $months[] = $month;
+            }
+
+            Month::insert($months);
+
         } else {
             $apartment = [];
             $apartment['number'] = $data['number'];
@@ -81,7 +102,22 @@ class ApartmentsController extends Controller
             $apartment['user_id'] = Auth::user()->id;
             $apartment['owners_email'] = '';
 
-            Apartment::create($apartment);
+            $apartment = Apartment::create($apartment);
+
+            if ($apartment) {
+                $month = [];
+                $month['month'] = Carbon::now()->startOfMonth()->format('Y-m-d');
+                $month['beginning_sum'] = 0;
+                $month['ending_sum'] = 0;
+                $month['balance'] = 0;
+                $month['taxes'] = '{}';
+                $month['created_at'] = 'now';
+                $month['updated_at'] = 'now';
+                $month['apartment_id'] = $apartment->id;
+                $month['building_id'] = $buildingId;
+
+                Month::create($month);
+            }
         }
 
         return redirect('buildings/' . $buildingId . '/apartments');
