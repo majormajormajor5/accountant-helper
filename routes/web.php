@@ -46,4 +46,4 @@ Route::delete('apartments/{apartmentId}', 'ApartmentsController@destroy');
 Route::get('owners/apartment/{apartmentId}', 'OwnersController@byApartment');
 Route::post('owners/{ownerId}/update', 'OwnersController@update');
 Route::delete('owners/{ownerId}', 'OwnersController@destroy');
-Route::post('owners/create');
+Route::post('owners', 'OwnersController@store');

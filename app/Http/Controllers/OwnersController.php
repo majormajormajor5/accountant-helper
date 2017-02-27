@@ -44,7 +44,44 @@ class OwnersController extends Controller
      */
     public function store(Request $request)
     {
-        //
+//        return $request['apartmentId'];
+        $rules = [
+            'user_id' => 'not_present'
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        // Validate the input and return correct response
+        if ($validator->fails())
+        {
+            return Response::json([
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+
+            ], 200);
+        }
+
+        $owner = new Owner([
+            'first_name' => '',
+            'second_name' => '',
+            'patronymic' => '',
+            'email' => '',
+            'phone' => '',
+            'user_id'=> Auth::user()->id,
+            'created_at' => 'now()',
+            'updated_at' => 'now()'
+        ]);
+
+        $createdOwner = Apartment::where('id', $request['apartmentId'])
+            ->where('user_id', Auth::user()->id)
+            ->first()
+            ->owners()
+            ->save($owner);
+
+        return Response::json([
+            'success' => true,
+            'ownerId' => $createdOwner->id
+        ], 200);
     }
 
     /**
@@ -126,19 +163,7 @@ class OwnersController extends Controller
 
     public function byApartment($apartmentId)
     {
-//        $owner = new Owner([
-//            'first_name' => 'anton',
-//            'second_name' => 'pavlov',
-//            'patronymic' => 'qqqq',
-//            'email' => 'asd@asd.asd',
-//            'phone' => '2132321123',
-//            'user_id'=> Auth::user()->id,
-//            'created_at' => 'now()',
-//            'updated_at' => 'now()'
-//        ]);
-//
-//        $apartment = Apartment::find($apartmentId);
-//        $apartment->owners()->save($owner);
+
 
         $apartment = Apartment::findOrFail($apartmentId);
         $owners = $apartment->owners;

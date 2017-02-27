@@ -7,7 +7,12 @@
 @section('header')
     <div class="row">
         <div class="col-sm-12">
-            <h3>Список домов &nbsp;&nbsp; <a href="{{ url('buildings/create') }}" type="button" role="button" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-plus"></span>@desktop Добавить новый@enddesktop</a></h3>
+            <h3>
+                Список домов &nbsp;&nbsp;
+                <a href="{{ url('buildings/create') }}" type="button" role="button" class="btn btn-info btn-sm">
+                    <span class="glyphicon glyphicon-plus"></span>@desktop Добавить новый@enddesktop
+                </a>
+            </h3>
             <hr style="
                         border: 0;
                         height: 1px;

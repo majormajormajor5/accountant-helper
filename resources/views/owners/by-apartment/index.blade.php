@@ -9,6 +9,9 @@
         <div class="col-sm-12">
             <h3>
                 Владельцы квартиры номер {{ $apartment->number }} дома {{ $apartment->building->name }} организации {{ $apartment->building->organization->name }}
+                <a href="{{ url('buildings/create') }}" type="button" role="button" class="btn btn-info btn-sm" @click.prevent="submitAjaxRequestCreate">
+                    <span class="glyphicon glyphicon-plus"></span>@desktop Добавить квартиру@enddesktop
+                </a>
             </h3>
             <hr style="
                         border: 0;
@@ -48,19 +51,19 @@
                     @foreach ($owners as $owner)
                         <tr v-if="owners[{{ $loop->index . '' }}]" v-on:dblclick.ctrl="owners[{{ $loop->index . '' }}] = false">
                             <td>
-                                <input @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $owner->second_name }}" id="{{ $owner->id }}">
+                                <input @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $owner->second_name }}" id="second-name-{{ $owner->id }}">
                             </td>
                             <td>
-                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $owner->first_name }}" id="{{ $owner->id }}">
+                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $owner->first_name }}" id="first-name-{{ $owner->id }}">
                             </td>
                             <td>
-                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $owner->patronymic }}" id="{{ $owner->id }}">
+                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $owner->patronymic }}" id="patronymic-{{ $owner->id }}">
                             </td>
                             <td>
-                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $owner->email }}" id="{{ $owner->id }}">
+                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $owner->email }}" id="email-{{ $owner->id }}">
                             </td>
                             <td>
-                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $owner->phone }}" id="{{ $owner->id }}">
+                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $owner->phone }}" id="owner-{{ $owner->id }}">
                             </td>
                             <td>
                                 {!! Form::open(['url' => 'owners/'. $owner->id,
@@ -80,28 +83,29 @@
                             </td>
                         </tr>
                     @endforeach
-                    <tr v-for="(additionalRow, index) in additionalRows">
+                    <tr v-for="(additionalRow, index) in additionalRows" v-on:dblclick.ctrl="this.additionalRows[index] = false">
                         <td>
-                            <input @focusout="checkChanges" @focusin="writeValue" type="text" value="" id="">
+                            <input @focusout="checkChanges" @focusin="writeValue" type="text" value="" :id=" 'second-name-' + additionalRow.ownerId">
                         </td>
                         <td>
-                            <input @focusout="checkChanges" @focusin="writeValue" type="text" value="" id="">
+                            <input @focusout="checkChanges" @focusin="writeValue" type="text" value="" :id=" 'first-name-' + additionalRow.ownerId">
                         </td>
                         <td>
-                            <input @focusout="checkChanges" @focusin="writeValue" type="text" value="" id="">
+                            <input @focusout="checkChanges" @focusin="writeValue" type="text" value="" :id=" 'patronymic-' + additionalRow.ownerId">
                         </td>
                         <td>
-                            <input @focusout="checkChanges" @focusin="writeValue" type="text" value="" id="">
+                            <input @focusout="checkChanges" @focusin="writeValue" type="text" value="" :id=" 'email-' + additionalRow.ownerId">
                         </td>
                         <td>
-                            <input @focusout="checkChanges" @focusin="writeValue" type="text" value="" id="">
+                            <input @focusout="checkChanges" @focusin="writeValue" type="text" value="" :id=" 'owner-' + additionalRow.ownerId">
                         </td>
                         <td>
-                            {!! Form::open(['url' => 'owners/'. 1,
+                            {!! Form::open(['url' => 'owners/',
                                   'method'=> 'DELETE',
                                   '@submit' => 'deleteOwner',
                                   'style'=> 'display: inline;',
-                                  'class' => 'pull-right'
+                                  'class' => 'pull-right',
+                                  ':id' => " 'delete-form-' + additionalRow.ownerId"
                                   ])
                             !!}
                             <button type="submit"
@@ -148,7 +152,7 @@
                     showModal: false,
                     message: 'message',
                     owners: Object.assign({}, JSON.parse(replaceQuotHTMLEntitiesWithDoubleQuotes("{{ $owners }}"))),
-                    additionalRows: ['', '']
+                    additionalRows: []
                 }
             },
 
@@ -167,7 +171,7 @@
                     var newValue = e.target.value;
 
                     if (newValue !== this.lastElementValue) {
-                        var ownerId = el.id;
+                        var ownerId = el.id.split('-').pop();
                         var cell = el.parentNode;
 
                         var x = cell.cellIndex;
@@ -186,6 +190,7 @@
                     var xmlhttp = new XMLHttpRequest();
 
                     xmlhttp.onreadystatechange = function() {
+                        //Clear previous alert message
                         if (document.getElementsByClassName('alert-message-bag')[0].innerHTML != '') {
                             app.emitClose();
                         }
@@ -196,7 +201,6 @@
                                 if (! response.success) {
                                     app.emitAlert();
                                     window.lastAJAXContainedErrors = true;
-//                                    console.log(window.lastAJAXContainedErrors);
                                     document.getElementsByClassName('alert-message-bag')[0].innerHTML = '';
                                     for (var key in response.errors) {
                                         document.getElementsByClassName('alert-message-bag')[0].innerHTML += '<p>' + response.errors[key] + '</p>';
@@ -214,6 +218,7 @@
                     xmlhttp.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
                     xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
                     xmlhttp.send("ownerId=" + ownerId + "&columnName=" + columnName + "&value=" + value);
+                    console.log('submitted');
                 },
 
                 deleteOwner: function (e) {
@@ -225,6 +230,14 @@
 
                     var method = el.method.toUpperCase();
                     var url = el.action;
+                    if (el.id) {
+                        url = url + '/' + el.id.split('-').pop();
+                    }
+                    console.log(url, method);
+//                    if (typeof parseInt(el.id.split('-').pop()) === 'number') {
+//                        url = url + '/' + el.id.split('-').pop()
+//                    }
+//                    console.log(method);
                     window.lastReadyForSubmitForm = {};
                     window.lastReadyForSubmitForm.formData = formData;
                     window.lastReadyForSubmitForm.url = url;
@@ -255,8 +268,41 @@
                     xmlhttp.send(window.lastReadyForSubmitForm.formData);
                 },
 
-                addOwner: function () {
-                    this.additionalRows.unshift({text: 'sometext'});
+                submitAjaxRequestCreate: function () {
+                    var xmlhttp = new XMLHttpRequest();
+
+                    xmlhttp.onreadystatechange = function() {
+                        if (document.getElementsByClassName('alert-message-bag')[0].innerHTML != '') {
+                            app.emitClose();
+                        }
+
+                        if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+                            if (xmlhttp.status == 200) {
+                                var response = JSON.parse(xmlhttp.responseText);
+                                console.log(xmlhttp.responseText);
+                                if (! response.success) {
+                                    app.emitAlert();
+                                    document.getElementsByClassName('alert-message-bag')[0].innerHTML = '';
+                                    for (var key in response.errors) {
+                                        document.getElementsByClassName('alert-message-bag')[0].innerHTML += '<p>' + response.errors[key] + '</p>';
+                                    }
+                                } else {
+                                    console.log(response.ownerId);
+                                    app.addOwner(response.ownerId);
+                                }
+                            }
+                        }
+                    };
+
+                    xmlhttp.open('POST', "{{ url('owners') }}", true);
+                    xmlhttp.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
+                    xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    xmlhttp.send("_method=" + "POST" + "&apartmentId=" + "{{ $apartment->id }}");
+
+                },
+
+                addOwner: function (ownerId) {
+                    this.additionalRows.push({'ownerId': ownerId});
                 }
             }
         });
