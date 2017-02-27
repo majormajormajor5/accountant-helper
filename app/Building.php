@@ -24,4 +24,9 @@ class Building extends Model
     {
         return $this->hasMany('App\Apartment');
     }
+
+    public function months()
+    {
+        return $this->hasMany('App\Month');
+    }
 }
