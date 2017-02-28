@@ -15,4 +15,14 @@ class Month extends Model
         'taxes',
         'building_id'
     ];
+
+    public function building()
+    {
+        return $this->belongsTo('App\Building');
+    }
+
+    public function apartment()
+    {
+        return $this->belongsTo('App\Apartment');
+    }
 }

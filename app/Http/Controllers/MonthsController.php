@@ -8,9 +8,17 @@ use App\Apartment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Response;
 
 class MonthsController extends Controller
 {
+    public $currentMonth;
+    public $previousMonth;
+    public $nextMonth;
+    public $lastMonth;
+    public $firstMonth;
+
     function __construct()
     {
         $this->middleware(['auth']);
@@ -76,9 +84,33 @@ class MonthsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $monthId)
     {
-        //
+        $rules = [
+            'user_id' => 'not_present'
+        ];
+
+        $dataForValidation = [$request['columnName'] => $request['value']];
+        $validator = Validator::make($dataForValidation, $rules);
+
+        // Validate the input and return correct response
+        if ($validator->fails())
+        {
+            return Response::json(array(
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+
+            ), 200);
+        }
+
+        Month::where('id', $monthId)
+            ->where('user_id', Auth::user()->id)
+            ->update([
+                $request['columnName'] => $request['value'],
+                'updated_at' => 'now'
+            ]);
+
+        return Response::json(array('success' => true), 200);
     }
 
     /**
@@ -96,36 +128,53 @@ class MonthsController extends Controller
     {
         $this->addMonthIfNeeded($buildingId);
 
-        $months = Building::where('id', $buildingId)
-            ->where('user_id', Auth::user()->id)
-            ->first()
-            ->months()
-            ->get();
+        $months = Month
+            ::where('months.building_id', $buildingId)
+            ->where('month', $this->getPreviousMonth()->format('Y-m-d'))
+            ->join('apartments', 'months.apartment_id', '=', 'apartments.id')
+            ->get()
+            ->sortBy('number'); //Sort by apartment's number
 
-        return view('months.by-building.index', compact('months'));
+//        По сути тоже самое, но 2 запроса вместо одного + трудности с orderBy
+//        $months = Building::where('id', $buildingId)
+//            ->where('user_id', Auth::user()->id)
+//            ->first()
+//            ->months()
+//            ->with(['apartment', 'building'])
+//            ->get();
+
+        $building = Building::where('id', $buildingId)
+            ->with(['organization'])
+            ->first();
+
+        return view('months.by-building.index', compact('months', 'buildingId', 'building'));
     }
 
     public function addMonthIfNeeded($buildingId)
     {
-        $latestMonth = \DateTimeImmutable::createFromFormat(
-            'Y-m-d',
-            Month::where('building_id', $buildingId)->max('month')
-        );
+        $months = Month::where('building_id', $buildingId)
+        ->orderBy('month')
+        ->get();
 
-        $currentMonth = (new \DateTimeImmutable())->modify('first day of this month');
-        $nextMonth = $currentMonth->add(new \DateInterval('P1M'));
+        $this->lastMonth = Carbon::createFromFormat('Y-m-d', $months->last()->month)->firstOfMonth();
+        $this->firstMonth = Carbon::createFromFormat('Y-m-d', $months->first()->month)->firstOfMonth();
 
-        if ($latestMonth->getTimestamp() < $nextMonth->getTimestamp()) {
+        $this->currentMonth = Carbon::now()->firstOfMonth();
+        $this->previousMonth =  Carbon::now()->sub(new \DateInterval('P1M'))->firstOfMonth();
+        $this->nextMonth = Carbon::now()->firstOfMonth()->add(new \DateInterval('P1M'));
+
+        if ($this->lastMonth->getTimestamp() < $this->nextMonth->getTimestamp()) {
             $apartments = Apartment::where('building_id', $buildingId)->pluck('id')->toArray();
 
             $months = [];
             foreach ($apartments as $apartment) {
                 $month = [];
-                $month['month'] = $nextMonth->format('Y-m-d');
+                $month['month'] = $this->nextMonth->format('Y-m-d');
                 $month['beginning_sum'] = 0;
                 $month['ending_sum'] = 0;
                 $month['balance'] = 0;
                 $month['taxes'] = '{}';
+                $month['user_id'] = Auth::user()->id;
                 $month['created_at'] = 'now';
                 $month['updated_at'] = 'now';
                 $month['apartment_id'] = $apartment;
@@ -139,5 +188,16 @@ class MonthsController extends Controller
         }
 
         return false;
+    }
+
+
+    public function getPreviousMonth()
+    {
+        //fallback
+        if ($this->firstMonth->getTimestamp() === $this->currentMonth->getTimestamp()) {
+            return $this->currentMonth;
+        }
+
+        return $this->previousMonth;
     }
 }

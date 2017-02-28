@@ -84,6 +84,7 @@ class ApartmentsController extends Controller
                 $month['ending_sum'] = 0;
                 $month['balance'] = 0;
                 $month['taxes'] = '{}';
+                $month['user_id'] = Auth::user()->id;
                 $month['created_at'] = 'now';
                 $month['updated_at'] = 'now';
                 $month['apartment_id'] = $apartment;
@@ -111,6 +112,7 @@ class ApartmentsController extends Controller
                 $month['ending_sum'] = 0;
                 $month['balance'] = 0;
                 $month['taxes'] = '{}';
+                $month['user_id'] = Auth::user()->id;
                 $month['created_at'] = 'now';
                 $month['updated_at'] = 'now';
                 $month['apartment_id'] = $apartment->id;

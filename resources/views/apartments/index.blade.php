@@ -1,7 +1,7 @@
 @extends('layout')
 
 @section('title')
-    Дома
+    Список квартир дома {{ $building->name }} организации {{ $building->organization->name }}
 @endsection
 
 @section('header')
@@ -33,7 +33,7 @@
                 <div class="alert alert-warning alert-dismissable">
                     <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
                     <h4>У данного дома пока нет квартир </h4>
-                    <a href="{{ url('apartments/apartment/' . $apartment->id . '/create') }}" class="btn btn-info"><span class="glyphicon glyphicon-plus"> </span> Добавить</a>
+                    <a href="{{ url('apartments/building/' . $building->id . '/create') }}" class="btn btn-info"><span class="glyphicon glyphicon-plus"> </span> Добавить</a>
                 </div>
             @else
                 <table class="table table-hover table-striped table-responsive" id="mytable">

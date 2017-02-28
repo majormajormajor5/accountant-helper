@@ -23,7 +23,7 @@ class BuildingsController extends Controller
      */
     public function index()
     {
-        $buildings = Auth::user()->buildings()->get();
+        $buildings = Auth::user()->buildings()->with('organization')->get();
 
         return view('buildings.index', compact('buildings'));
     }

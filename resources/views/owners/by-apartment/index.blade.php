@@ -25,7 +25,6 @@
 @endsection
 
 @section('content')
-    <button @click="addOwner">add+</button>
     <div class="row">
         <div class="col-sm-12">
             <alert-hidden id="my-alert"></alert-hidden>
