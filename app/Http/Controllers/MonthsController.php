@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Building;
+use App\Month;
+use App\Apartment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -91,6 +94,8 @@ class MonthsController extends Controller
 
     public function byBuilding($buildingId)
     {
+        $this->addMonthIfNeeded($buildingId);
+
         $months = Building::where('id', $buildingId)
             ->where('user_id', Auth::user()->id)
             ->first()
@@ -98,5 +103,41 @@ class MonthsController extends Controller
             ->get();
 
         return view('months.by-building.index', compact('months'));
+    }
+
+    public function addMonthIfNeeded($buildingId)
+    {
+        $latestMonth = \DateTimeImmutable::createFromFormat(
+            'Y-m-d',
+            Month::where('building_id', $buildingId)->max('month')
+        );
+
+        $currentMonth = (new \DateTimeImmutable())->modify('first day of this month');
+        $nextMonth = $currentMonth->add(new \DateInterval('P1M'));
+
+        if ($latestMonth->getTimestamp() < $nextMonth->getTimestamp()) {
+            $apartments = Apartment::where('building_id', $buildingId)->pluck('id')->toArray();
+
+            $months = [];
+            foreach ($apartments as $apartment) {
+                $month = [];
+                $month['month'] = $nextMonth->format('Y-m-d');
+                $month['beginning_sum'] = 0;
+                $month['ending_sum'] = 0;
+                $month['balance'] = 0;
+                $month['taxes'] = '{}';
+                $month['created_at'] = 'now';
+                $month['updated_at'] = 'now';
+                $month['apartment_id'] = $apartment;
+                $month['building_id'] = $buildingId;
+                $months[] = $month;
+            }
+
+            if(Month::insert($months)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
