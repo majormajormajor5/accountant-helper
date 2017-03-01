@@ -49,6 +49,8 @@ Route::delete('owners/{ownerId}', 'OwnersController@destroy');
 Route::post('owners', 'OwnersController@store');
 
 //Months
-
 Route::get('months/building/{buildingId}', 'MonthsController@byBuilding');
 Route::patch('months/{monthsId}', 'MonthsController@update');
+
+//Taxes
+Route::get('taxes/month/{monthId}/create', 'TaxesController@create');

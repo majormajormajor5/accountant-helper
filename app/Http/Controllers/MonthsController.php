@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Input;
 
 class MonthsController extends Controller
 {
@@ -87,7 +88,13 @@ class MonthsController extends Controller
     public function update(Request $request, $monthId)
     {
         $rules = [
-            'user_id' => 'not_present'
+            'user_id' => 'not_present',
+            'beginning_sum' => 'not_present',
+            'balance' => 'not_present',
+            'taxes' => 'not_present',
+            'created_at' => 'not_present',
+            'updated_at' => 'not_present',
+            'month' => 'not_present'
         ];
 
         $dataForValidation = [$request['columnName'] => $request['value']];
@@ -124,13 +131,31 @@ class MonthsController extends Controller
         //
     }
 
-    public function byBuilding($buildingId)
+    public function byBuilding(Request $request, $buildingId)
     {
         $this->addMonthIfNeeded($buildingId);
 
         $months = Month
             ::where('months.building_id', $buildingId)
-            ->where('month', $this->getPreviousMonth()->format('Y-m-d'))
+            ->where('month', $this->getPreviousMonth()->format('Y-m-d'));
+
+        if ($request['from-date']) {
+            $months = $months->where('month', '>=', $request['from-date']);
+        }
+
+        if ($request['to-date']) {
+            $months = $months->where('month', '<=', $request['to-date']);
+        }
+
+        if ($request['from-apartment']) {
+            $months = $months->where('apartment_id', '>=', $request['from-apartment']);
+        }
+
+        if ($request['to-apartment']) {
+            $months = $months->where('apartment_id', '<=', $request['to-apartment']);
+        }
+
+        $months = $months
             ->join('apartments', 'months.apartment_id', '=', 'apartments.id')
             ->get()
             ->sortBy('number'); //Sort by apartment's number
@@ -147,7 +172,7 @@ class MonthsController extends Controller
             ->with(['organization'])
             ->first();
 
-        return view('months.by-building.index', compact('months', 'buildingId', 'building'));
+        return view('months.by-building.index', compact('months', 'buildingId', 'building', 'request'));
     }
 
     public function addMonthIfNeeded($buildingId)

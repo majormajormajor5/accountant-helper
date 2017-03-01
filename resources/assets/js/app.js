@@ -20,3 +20,6 @@ Vue.prototype.trans = (key) => {
     return _.get(window.trans, key, key);
 };
 
+import Datepicker from 'vuejs-datepicker';
+
+Vue.component('datepicker', Datepicker);

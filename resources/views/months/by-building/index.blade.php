@@ -28,51 +28,82 @@
         <div class="col-sm-12">
             <alert-hidden id="my-alert"></alert-hidden>
             <section></section>
-            @if (empty($months->toArray()))
-                <div class="alert alert-warning alert-dismissable">
-                    <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
-                    <h4>У данного дома пока нет квартир </h4>
-                    <a href="{{ url('months/create') }}" class="btn btn-info"><span class="glyphicon glyphicon-plus"> </span> Добавить</a>
-                </div>
-            @else
-                <table class="table table-hover table-striped table-responsive" id="mytable">
-                    <thead>
-                    <tr>
-                        <th id="apartment_number">Квартира</th>
-                        <th id="month">Месяц</th>
-                        <th id="taxes">Налоги</th>
-                        <th id="beginning_sum">Сумма на начало</th>
-                        <th id="ending_sum">Сумма на конец</th>
-                        <th id="balance">Баланс</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach ($months as $month)
-                        <tr v-if="months[{{ $loop->index . '' }}]" v-on:dblclick.ctrl="months[{{ $loop->index . '' }}] = false">
-                            <td>
-                                <a href="#">{{ $month->apartment->number }}</a>
-                            </td>
-                            <td>
-                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $month->month }}" id="month-{{ $month->id }}">
-                            </td>
-                            <td>
-                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $month->taxes }}" id="taxes-{{ $month->id }}">
-                            </td>
-                            <td>
-                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $month->beginning_sum }}" id="beginning-sum-{{ $month->id }}">
-                            </td>
-                            <td>
-                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $month->ending_sum }}" id="ending-sum-{{ $month->id }}">
-                            </td>
-                            <td>
-                                <input  @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $month->balance }}" id="balance-{{ $month->id }}">
-                            </td>
+            <button @click="showFilters = ! showFilters" class="btn btn-info">
+                Фильтры
+                <span v-show="! showFilters">+</span>
+                <span v-show="showFilters">-</span>
+            </button>
+            {{--@if (empty($months->toArray()))--}}
+                {{--<div class="alert alert-warning alert-dismissable">--}}
+                    {{--<a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>--}}
+                    {{--<h4>У данного дома пока нет квартир </h4>--}}
+                    {{--<a href="{{ url('months/create') }}" class="btn btn-info"><span class="glyphicon glyphicon-plus"> </span> Добавить</a>--}}
+                {{--</div>--}}
+            {{--@else--}}
+                    {!! Form::open(['method' => 'GET', 'class' => 'form-horizontal', 'v-show' => 'showFilters']) !!}
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="name">С даты:</label>
+                            <datepicker language="ru" name="from-date" format="d-MM-yyyy" class="" value="{{ $request['from-date'] }}"></datepicker>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="name">По дату:</label>
+                            <datepicker language="ru" name="to-date" format="d-MM-yyyy" class=""></datepicker>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="name">C квартиры:</label>
+                            <input type="text" name="from-apartment" value="{{ $request['from-apartment'] }}">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="name">По квартиру:</label>
+                            <input type="text" name="to-apartment" value="{{ $request['to-apartment'] }}">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="name"></label>
+                            <button type="submit" class="btn btn-info">Отфильтровать</button>
+                        </div>
+                    {!! Form::close() !!}
+
+                @if (! empty($months->toArray()))
+                    <table class="table table-hover table-striped table-responsive" id="mytable">
+                        <thead>
+                        <tr>
+                            <th id="apartment_number">Квартира</th>
+                            <th id="month">Месяц</th>
+                            <th id="taxes">Налоги</th>
+                            <th id="beginning_sum">Сумма на начало</th>
+                            <th id="ending_sum">Сумма на конец</th>
+                            <th id="balance">Баланс</th>
                         </tr>
-                    @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        @foreach ($months as $month)
+                            <tr v-if="months[{{ $loop->index . '' }}]" v-on:dblclick.ctrl="months[{{ $loop->index . '' }}] = false">
+                                <td>
+                                    <a href="#">{{ $month->apartment->number }}</a>
+                                </td>
+                                <td>
+                                    <input type="text" value="{{ $month->month }}" id="month-{{ $month->id }}" readonly="readonly">
+                                </td>
+                                <td>
+                                    <input type="text" value="{{ $month->taxes }}" id="taxes-{{ $month->id }}" readonly="readonly">
+                                    <a href="#"><span class="glyphicon glyphicon-wrench"></span></a>
+                                </td>
+                                <td>
+                                    <input type="text" value="{{ $month->beginning_sum }}" id="beginning-sum-{{ $month->id }}" readonly="readonly">
+                                </td>
+                                <td>
+                                    <input @focusout="checkChanges" @focusin="writeValue" type="text" value="{{ $month->ending_sum }}" id="ending-sum-{{ $month->id }}">
+                                </td>
+                                <td>
+                                    <input type="text" value="{{ $month->balance }}" id="balance-{{ $month->id }}" readonly="readonly">
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                @endif
         </div>
-        @endif
+        {{--@endif--}}
     </div>
 
     <button id="vue-show-modal" v-show="false" @click="showModal = true" class="hidden">Show Modal</button>
@@ -102,6 +133,7 @@
             data: function () {
                 return {
                     showModal: false,
+                    showFilters: false,
                     message: 'message',
                     months: Object.assign({}, JSON.parse(replaceQuotHTMLEntitiesWithDoubleQuotes("{{ $months }}"))),
                     additionalRows: []
