@@ -86,7 +86,7 @@
                                 </td>
                                 <td>
                                     <input type="text" value="{{ $month->taxes }}" id="taxes-{{ $month->id }}" readonly="readonly">
-                                    <a href="#"><span class="glyphicon glyphicon-wrench"></span></a>
+                                    <a href="{{ url('taxes/month/' . $month->id . '/edit') }}"><span class="glyphicon glyphicon-wrench"></span></a>
                                 </td>
                                 <td>
                                     <input type="text" value="{{ $month->beginning_sum }}" id="beginning-sum-{{ $month->id }}" readonly="readonly">

@@ -16,7 +16,7 @@ class TaxesController extends Controller
 {
     public function __construct()
     {
-        $this->middleware = ['auth'];
+        $this->middleware(['auth']);
     }
 
     /**
@@ -34,9 +34,8 @@ class TaxesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create($monthId)
+    public function create()
     {
-        return view('taxes.create');
     }
 
     /**
@@ -67,9 +66,13 @@ class TaxesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($monthId)
     {
-        //
+        $month = Month::where('id', $monthId)
+            ->where('user_id', Auth::user()->id)
+            ->firstOrFail();
+
+        return view('taxes.edit', compact('month'));
     }
 
     /**

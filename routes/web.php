@@ -53,4 +53,4 @@ Route::get('months/building/{buildingId}', 'MonthsController@byBuilding');
 Route::patch('months/{monthsId}', 'MonthsController@update');
 
 //Taxes
-Route::get('taxes/month/{monthId}/create', 'TaxesController@create');
+Route::get('taxes/month/{monthId}/edit', 'TaxesController@edit');
