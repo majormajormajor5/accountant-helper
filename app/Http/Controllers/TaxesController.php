@@ -72,7 +72,9 @@ class TaxesController extends Controller
             ->where('user_id', Auth::user()->id)
             ->firstOrFail();
 
-        return view('taxes.edit', compact('month'));
+        $taxes = $month->taxes;
+
+        return view('taxes.edit', compact('month', 'taxes'));
     }
 
     /**
@@ -82,9 +84,17 @@ class TaxesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $monthId)
     {
-        //
+        $month = Month::where('id', $monthId)
+            ->where('user_id', Auth::user()->id)
+            ->update($request->only(['taxes']));
+
+        if (! $month) {
+            return redirect()->back();
+        } else {
+            return redirect()->action('TaxesController@byBuilding', [$request['building-id']]);
+        }
     }
 
     /**
@@ -96,5 +106,10 @@ class TaxesController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function byBuilding($buildingId)
+    {
+        return var_dump($buildingId);
     }
 }

@@ -159,7 +159,10 @@ class MonthsController extends Controller
             ->join('apartments', 'months.apartment_id', '=', 'apartments.id')
             ->get()
             ->sortBy('number'); //Sort by apartment's number
-
+        //TODO figure out why not empty json object causing javascript to crash on this page
+        foreach ($months as $month) {
+            $month->taxes = '{}';
+        }
 //        По сути тоже самое, но 2 запроса вместо одного + трудности с orderBy
 //        $months = Building::where('id', $buildingId)
 //            ->where('user_id', Auth::user()->id)
