@@ -83,6 +83,12 @@
                     </div>
                 </div>
                 <div class="form-group" v-if="variable">
+                    <label class="control-label col-sm-2" for="variable-value">Значение: </label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="variable-value" placeholder="Значение" v-model="variableValue">
+                    </div>
+                </div>
+                <div class="form-group" v-if="variable">
                     <label class="control-label col-sm-2" for="variable-save"></label>
                     <div class="col-sm-4">
                         <button id="variable-save" class="btn btn-info btn-block" @click.prevent="saveVariable()">Сохранить</button>
@@ -180,6 +186,7 @@
                     constantName: '',
                     constantValue: '',
                     variableName: '',
+                    variableValue: '',
 
                     constants: {},
                     variables: {}
@@ -207,11 +214,14 @@
                    var element = document.createElement('a');
                    element.setAttribute('href', '#');
                    element.setAttribute('class', 'formula-custom');
-                   element.setAttribute('data-value', this.constantValue);
+                   element.setAttribute('data-value', this.constantName);
                    element.innerHTML = this.constantName;
-                   document.querySelector('#formula-drop-constants').appendChild(element);
+                   //Add only if not exists
+                   if (! this.constants[this.constantName]) {
+                       this.constants[this.constantName] = this.constantValue;
+                       document.querySelector('#formula-drop-constants').appendChild(element);
+                   }
                    calculateFormula();
-                   this.constants[this.constantName] = this.constantValue;
                    this.closeAll();
                },
 
@@ -219,10 +229,14 @@
                    var element = document.createElement('a');
                    element.setAttribute('href', '#');
                    element.setAttribute('class', 'formula-custom');
+                   element.setAttribute('data-value', this.variableName);
                    element.innerHTML = this.variableName;
-                   document.querySelector('#formula-drop-variables').appendChild(element);
+                   //Add only if not exists
+                   if (! this.variables[this.variableName]) {
+                       this.variables[this.variableName] = this.variableValue;
+                       document.querySelector('#formula-drop-variables').appendChild(element);
+                   }
                    calculateFormula();
-                   this.variables[this.variableName] = '';
                    this.closeAll();
                },
 

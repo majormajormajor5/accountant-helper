@@ -56,3 +56,6 @@ Route::patch('months/{monthsId}', 'MonthsController@update');
 Route::get('taxes/month/{monthId}/edit', 'TaxesController@edit');
 Route::patch('taxes/month/{monthId}', 'TaxesController@update');
 Route::get('taxes/building/{buildingId}', 'TaxesController@byBuilding');
+Route::patch('taxes-variables/month/{monthId}', 'TaxesController@updateTaxesVariables');
+
+Route::get('test', 'TaxesController@recalculateBeginningSum');
