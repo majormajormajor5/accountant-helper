@@ -103,21 +103,36 @@ class MonthsController extends Controller
         // Validate the input and return correct response
         if ($validator->fails())
         {
-            return Response::json(array(
+            return Response::json([
                 'success' => false,
                 'errors' => $validator->getMessageBag()->toArray()
 
-            ), 200);
+            ], 200);
         }
 
-        Month::where('id', $monthId)
-            ->where('user_id', Auth::user()->id)
-            ->update([
-                $request['columnName'] => $request['value'],
-                'updated_at' => 'now'
-            ]);
+        if ($request['columnName'] == 'ending_sum') {
+            $month = Month::where('id', $monthId)
+                ->where('user_id', Auth::user()->id)
+                ->firstOrFail();
 
-        return Response::json(array('success' => true), 200);
+            if ($previousMonth = $this->getPreviousMonthFrom($month)) {
+                $month->beginning_sum = $month->beginning_sum + $previousMonth->balance;
+            }
+
+            $month->ending_sum = $request['value'];
+            $month->balance = $month->beginning_sum - $month->ending_sum;
+
+            $month->save();
+        } else {
+            Month::where('id', $monthId)
+                ->where('user_id', Auth::user()->id)
+                ->update([
+                    $request['columnName'] => $request['value'],
+                    'updated_at' => 'now'
+                ]);
+        }
+
+        return Response::json(['success' => true], 200);
     }
 
     /**
@@ -137,7 +152,7 @@ class MonthsController extends Controller
 
         $months = Month
             ::where('months.building_id', $buildingId)
-            ->where('month', $this->getPreviousMonth()->format('Y-m-d'));
+            ->where('month', $this->getPreviousMonthFromCurrent()->format('Y-m-d'));
 
         if ($request['from-date']) {
             $months = $months->where('month', '>=', $request['from-date']);
@@ -219,7 +234,7 @@ class MonthsController extends Controller
     }
 
 
-    public function getPreviousMonth()
+    public function getPreviousMonthFromCurrent()
     {
         //fallback
         if ($this->firstMonth->getTimestamp() === $this->currentMonth->getTimestamp()) {
@@ -227,5 +242,19 @@ class MonthsController extends Controller
         }
 
         return $this->previousMonth;
+    }
+    
+    public function getPreviousMonthFrom($month)
+    {
+        $previousMonth = Month::where('user_id', Auth::user()->id)
+            ->where('apartment_id', $month->apartment_id)
+            ->where('month', Carbon::createFromFormat('Y-m-d', $month->month)->sub(new \DateInterval('P1M'))->firstOfMonth())
+            ->first();
+
+        if ($previousMonth) {
+            return $previousMonth;
+        }
+
+        return false;
     }
 }

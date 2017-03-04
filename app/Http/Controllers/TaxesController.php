@@ -301,7 +301,8 @@ class TaxesController extends Controller
 
     public function recalculateBeginningSum($month)
     {
-        $taxes = json_decode($month->taxes, true);
+        $taxes = json_decode(preg_replace('/(::)|[\$>]/', '', $month->taxes), true);
+
 
         $vars = [];
         $varsReplacementsValues = [];
@@ -324,6 +325,9 @@ class TaxesController extends Controller
         eval( '$beginningSum = (' . $formulaWithVariables . ');' );
 
         $month->beginning_sum = $beginningSum;
+        if ($previousMonth = $this->getPreviousMonthFrom($month)) {
+            $month->beginning_sum += $previousMonth->balance;
+        }
         $month->balance = $month->beginning_sum - $month->ending_sum;
         $month->save();
     }
@@ -331,5 +335,19 @@ class TaxesController extends Controller
     public function validateFormula($formula)
     {
         return preg_match('/^([-+]? ?([0-9]+([.][0-9]+)?|\(\g<1>\))( ?[-+*\/] ?\g<1>)?)$/', trim($formula)) > 0;
+    }
+
+    public function getPreviousMonthFrom($month)
+    {
+        $previousMonth = Month::where('user_id', Auth::user()->id)
+            ->where('apartment_id', $month->apartment_id)
+            ->where('month', Carbon::createFromFormat('Y-m-d', $month->month)->sub(new \DateInterval('P1M'))->firstOfMonth())
+            ->first();
+
+        if ($previousMonth) {
+            return $previousMonth;
+        }
+
+        return false;
     }
 }
