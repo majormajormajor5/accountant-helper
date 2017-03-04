@@ -115,11 +115,75 @@ class TaxesController extends Controller
             return redirect()->back();
         }
 
-        $month = Month::where('id', $monthId)
-            ->where('user_id', Auth::user()->id)
-            ->update($request->only(['taxes']));
+        $months = Month::where('user_id', Auth::user()->id)
+            ->where('building_id', $request['building-id']);
 
-        if (! $month) {
+        $filter = false;
+
+        if ($request['from-date']) {
+            $months = $months->where('month', '>=', $request['from-date']);
+            $filter = true;
+        }
+
+        if ($request['to-date']) {
+            $months = $months->where('month', '<=', $request['to-date']);
+            $filter = true;
+        }
+
+        if ($request['from-apartment'] && !$request['to-apartment']) {
+            $apartments = Apartment::where('user_id', Auth::user()->id)
+                ->get()
+                ->pluck('number', 'id');
+            $apartmentIds = [];
+
+            foreach ($apartments as $apartmentId => $apartmentNumber) {
+                if ($apartmentNumber >= $request['from-apartment']) {
+                    var_dump($apartmentNumber);
+                    $apartmentIds[] = $apartmentId;
+                }
+            }
+            $months = $months->whereIn('apartment_id', $apartmentIds);
+            $filter = true;
+        }
+
+        if ($request['to-apartment'] && !$request['from-apartment']) {
+            $apartments = Apartment::where('user_id', Auth::user()->id)
+                ->get()
+                ->pluck('number', 'id');
+            $apartmentIds = [];
+
+            foreach ($apartments as $apartmentId => $apartmentNumber) {
+                if ($apartmentNumber <= $request['to-apartment']) {
+                    $apartmentIds[] = $apartmentId;
+                }
+            }
+            $months = $months->whereIn('apartment_id', $apartmentIds);
+            $filter = true;
+        }
+
+        if ($request['from-apartment'] && $request['to-apartment']) {
+            $apartments = Apartment::where('user_id', Auth::user()->id)
+                ->get()
+                ->pluck('number', 'id');
+            $apartmentIds = [];
+
+            foreach ($apartments as $apartmentId => $apartmentNumber) {
+                if ($apartmentNumber >= $request['from-apartment'] && $apartmentNumber <= $request['to-apartment']) {
+                    $apartmentIds[] = $apartmentId;
+                }
+            }
+
+            $months = $months->whereIn('apartment_id', $apartmentIds);
+            $filter = true;
+        }
+
+        if (! $filter) {
+            $months = $months->where('id', $monthId);
+        }
+
+        $months->update($request->only(['taxes']));
+
+        if (! $months) {
             return redirect()->back();
         } else {
             return redirect()->action('TaxesController@byBuilding', [$request['building-id']]);

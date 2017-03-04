@@ -43,11 +43,11 @@
                     {!! Form::open(['method' => 'GET', 'class' => 'form-horizontal', 'v-show' => 'showFilters']) !!}
                         <div class="form-group">
                             <label class="control-label col-sm-2" for="name">С даты:</label>
-                            <datepicker language="ru" name="from-date" format="d-MM-yyyy" class="" value="{{ $request['from-date'] }}"></datepicker>
+                            <datepicker language="ru" name="from-date" format="dd-MM-yyyy" class="" value="{{ $request['from-date'] }}"></datepicker>
                         </div>
                         <div class="form-group">
                             <label class="control-label col-sm-2" for="name">По дату:</label>
-                            <datepicker language="ru" name="to-date" format="d-MM-yyyy" class=""></datepicker>
+                            <datepicker language="ru" name="to-date" format="dd-MM-yyyy" class="" value="{{ $request['to-date'] }}"></datepicker>
                         </div>
                         <div class="form-group">
                             <label class="control-label col-sm-2" for="name">C квартиры:</label>

@@ -10,7 +10,7 @@
             <h3>
                 Владельцы квартиры номер {{ $apartment->number }} дома {{ $apartment->building->name }} организации {{ $apartment->building->organization->name }}
                 <a href="{{ url('buildings/create') }}" type="button" role="button" class="btn btn-info btn-sm" @click.prevent="submitAjaxRequestCreate">
-                    <span class="glyphicon glyphicon-plus"></span>@desktop Добавить квартиру@enddesktop
+                    <span class="glyphicon glyphicon-plus"></span>@desktop Добавить владельцев@enddesktop
                 </a>
             </h3>
             <hr style="
@@ -29,13 +29,12 @@
         <div class="col-sm-12">
             <alert-hidden id="my-alert"></alert-hidden>
             <section></section>
-            @if (empty($owners->toArray()))
-                <div class="alert alert-warning alert-dismissable">
-                    <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
-                    <h4>У данного дома пока нет квартир </h4>
-                    <a href="{{ url('owners/create') }}" class="btn btn-info"><span class="glyphicon glyphicon-plus"> </span> Добавить</a>
-                </div>
-            @else
+            {{--@if (empty($owners->toArray()))--}}
+                {{--<div class="alert alert-warning alert-dismissable" v-show="">--}}
+                    {{--<a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>--}}
+                    {{--<h4>У данной квартиры пока нет владельцев </h4>--}}
+                {{--</div>--}}
+            {{--@else--}}
                 <table class="table table-hover table-striped table-responsive" id="mytable">
                     <thead>
                     <tr>
@@ -82,7 +81,10 @@
                             </td>
                         </tr>
                     @endforeach
-                    <tr v-for="(additionalRow, index) in additionalRows" v-on:dblclick.ctrl="this.additionalRows[index] = false">
+                    <?php
+                            //TODO Починить удаление владельцев
+                            ?>
+                    <tr v-for="(additionalRow, index) in additionalRows" v-on:dblclick.ctrl="console.log('hello')">
                         <td>
                             <input @focusout="checkChanges" @focusin="writeValue" type="text" value="" :id=" 'second-name-' + additionalRow.ownerId">
                         </td>
@@ -119,7 +121,7 @@
                     </tbody>
                 </table>
         </div>
-        @endif
+        {{--@endif--}}
     </div>
 
     <button id="vue-show-modal" v-show="false" @click="showModal = true" class="hidden">Show Modal</button>
@@ -144,6 +146,7 @@
 
             created: function () {
                 bus.$on('modal-confirmed', this.submitAjaxRequestDelete);
+                {{--console.log(!!JSON.parse(replaceQuotHTMLEntitiesWithDoubleQuotes("{{ $owners }}")).length);--}}
             },
 
             data: function () {

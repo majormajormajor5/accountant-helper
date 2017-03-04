@@ -23,6 +23,9 @@
             border: 0.2em solid #006b96;
             min-height: 150px;
         }
+        .formula-custom {
+            margin: 1em;
+        }
     </style>
 @endsection
 
@@ -50,7 +53,7 @@
 @section('content')
     <div class="row">
         <div class="col-sm-12">
-            <button class="btn btn-info" @click="showConstant()">Добавить константу</button>
+            {{--<button class="btn btn-info" @click="showConstant()">Добавить константу</button>--}}
             <button class="btn btn-info" @click="showVariable()">Добавить переменную</button>
         </div>
     </div>
@@ -106,16 +109,19 @@
         <i class="fa fa-mouse-pointer" aria-hidden="true"></i>
         {{--<h4>You can drag and drop each of below items to formula area.</h4>--}}
         {{--<p>If you want to set a value on your custom drag and drop item, Set <span class="label label-default">data-value</span> attribute on your element.</p>--}}
-        <h4>Константы:</h4>
-        <div class="formula-drop-items constant-container" id="formula-drop-constants">
 
-        </div>
+        {{--<h4>Константы:</h4>--}}
+        {{--<div class="formula-drop-items constant-container" id="formula-drop-constants">--}}
+
+        {{--</div>--}}
 
         <div class="formula-drop">
             <i class="fa fa-mouse-pointer" aria-hidden="true"></i>
             <h4>Переменные:</h4>
             <div class="formula-drop-items variable-container" id="formula-drop-variables">
 
+                <a href="#" class="formula-custom" data-value="{{ $month->number_of_residents }}">Количество проживающих</a>
+                <a href="#" class="formula-custom" data-value="{{ $month->square }}">Площать</a>
             </div>
         </div>
     </div>
@@ -127,6 +133,29 @@
             {!! Form::open(['action' => ['TaxesController@update', $month->id], 'method' => 'PATCH', '@submit' => 'saveTaxes']) !!}
                 <input type="hidden" id="taxes" name="taxes">
                 <input type="hidden" value="{{ $month->building_id }}" name="building-id">
+                <button type="button" role="button" @click="showFilters = ! showFilters" class="btn btn-info">
+                    Применить формулу для
+                    <span v-show="! showFilters">+</span>
+                    <span v-show="showFilters">-</span>
+                </button>
+                <div v-show="showFilters">
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="name">С даты:</label>
+                        <datepicker language="ru" name="from-date" format="dd-MM-yyyy" class="" value=""></datepicker>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="name">По дату:</label>
+                        <datepicker language="ru" name="to-date" format="dd-MM-yyyy" class="" value=""></datepicker>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="name">C квартиры:</label>
+                        <input type="text" name="from-apartment" value="">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="name">По квартиру:</label>
+                        <input type="text" name="to-apartment" value="">
+                    </div>
+                </div>
                 <button class="btn btn-info" role="button" id="form-submit">Сохранить формулу</button>
             {!! Form::close() !!}
             {{--<form @submit="saveTaxes">--}}
@@ -179,6 +208,7 @@
                 return {
                     {{--taxes: JSON.parse(replaceQuotHTMLEntitiesWithDoubleQuotes("{{ $taxes }}")),--}}
                     taxes: {},
+                    showFilters: false,
 
                     constant: false,
                     variable: false,
@@ -231,6 +261,9 @@
                    element.setAttribute('class', 'formula-custom');
                    element.setAttribute('data-value', this.variableName);
                    element.innerHTML = this.variableName;
+                   if (! this.variableValue) {
+                       this.variableValue = '1';
+                   }
                    //Add only if not exists
                    if (! this.variables[this.variableName]) {
                        this.variables[this.variableName] = this.variableValue;
@@ -274,6 +307,5 @@
                }
             }
         });
-
     </script>
 @endsection

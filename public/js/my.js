@@ -61,3 +61,12 @@ function simulateMouseEvent(eventName, element, options) {
 function replaceQuotHTMLEntitiesWithDoubleQuotes(string) {
     return string.replace(/&quot;/g, '\"')
 }
+
+function isEmpty(obj) {
+    for(var prop in obj) {
+        if(obj.hasOwnProperty(prop))
+            return false;
+    }
+
+    return true;
+}
