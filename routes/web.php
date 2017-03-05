@@ -67,3 +67,4 @@ Route::get('test', 'TaxesController@recalculateBeginningSum');
 //Bills
 Route::get('bills/building/{buildingId}', 'BillsController@byBuilding');
 Route::get('bills/building/{buildingId}/create', 'BillsController@byBuildingCreate');
+Route::post('bills/building/{buildingId}', 'BillsController@byBuildingStore');

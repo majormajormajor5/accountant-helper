@@ -152,6 +152,8 @@ class MonthsController extends Controller
 
         $months = Month
             ::where('months.building_id', $buildingId)
+            ->where('user_id', Auth::user()->id)
+            ->with(['apartment', 'apartment.building'])
             ->where('month', $this->getPreviousMonthFromCurrent()->format('Y-m-d'));
 
         if ($request['from-date']) {
@@ -171,13 +173,17 @@ class MonthsController extends Controller
         }
 
         $months = $months
-            ->join('apartments', 'months.apartment_id', '=', 'apartments.id')
-            ->get()
-            ->sortBy('number'); //Sort by apartment's number
+            ->get();
+        $combMonths = [];
         //TODO figure out why not empty json object causing javascript to crash on this page
         foreach ($months as $month) {
             $month->taxes = '{}';
+            $combMonths[$month->apartment->number] = $month;
         }
+
+        ksort($combMonths);
+
+        $months->sortBy('number');
 //        По сути тоже самое, но 2 запроса вместо одного + трудности с orderBy
 //        $months = Building::where('id', $buildingId)
 //            ->where('user_id', Auth::user()->id)
@@ -190,7 +196,7 @@ class MonthsController extends Controller
             ->with(['organization'])
             ->first();
 
-        return view('months.by-building.index', compact('months', 'buildingId', 'building', 'request'));
+        return view('months.by-building.index', compact('months', 'buildingId', 'building', 'request', 'combMonths'));
     }
 
     public function addMonthIfNeeded($buildingId)

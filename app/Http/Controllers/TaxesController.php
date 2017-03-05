@@ -99,7 +99,7 @@ class TaxesController extends Controller
         $varsReplacements = [];
         foreach ($taxes['variables'] as $variableName => $variableValue) {
             if (! is_numeric($variableValue)) {
-                return redirect()->back();
+//                return redirect()->back();
             }
 
             $vars[] = $variableName;
@@ -111,9 +111,9 @@ class TaxesController extends Controller
         $formula = str_replace(',', '', implode('', $taxes['formula']));
         $formulaWithVariablesValues = str_replace($vars, $varsReplacementsValues, $formula);
 
-        if (! $this->validateFormula($formulaWithVariablesValues)) {
-            return redirect()->back();
-        }
+//        if (! $this->validateFormula($formulaWithVariablesValues)) {
+//            return redirect()->back();
+//        }
 
         $months = Month::where('user_id', Auth::user()->id)
             ->where('building_id', $request['building-id']);

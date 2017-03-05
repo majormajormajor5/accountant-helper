@@ -33,6 +33,9 @@
                 <span v-show="! showFilters">+</span>
                 <span v-show="showFilters">-</span>
             </button>
+            <a role="button" type="button"  class="btn btn-info" href="{{ url('bills/building/' . $building->id . '/create') }}">
+                Перейти к документам
+            </a>
             {{--@if (empty($months->toArray()))--}}
                 {{--<div class="alert alert-warning alert-dismissable">--}}
                     {{--<a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>--}}
@@ -46,7 +49,6 @@
                             <datepicker language="ru" name="from-date" format="dd-MM-yyyy" class="" value="{{ $request['from-date'] }}"></datepicker>
                         </div>
                         <div class="form-group">
-                            <label class="control-label col-sm-2" for="name">По дату:</label>
                             <datepicker language="ru" name="to-date" format="dd-MM-yyyy" class="" value="{{ $request['to-date'] }}"></datepicker>
                         </div>
                         <div class="form-group">
@@ -76,7 +78,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach ($months as $month)
+                        @foreach ($combMonths as $month)
                             <tr v-if="months[{{ $loop->index . '' }}]" v-on:dblclick.ctrl="months[{{ $loop->index . '' }}] = false">
                                 <td>
                                     <a href="#">{{ $month->apartment->number }}</a>

@@ -14,4 +14,10 @@ class Owner extends Model
     {
         return $this->belongsToMany('App\Apartment');
     }
+
+    public function getFullName()
+    {
+        return $this->second_name . " " .$this->first_name . " " . $this->patronymic;
+    }
+
 }
