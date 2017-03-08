@@ -88,7 +88,7 @@
                                     <input type="text" value="{{ $month->month }}" id="month-{{ $month->id }}" readonly="readonly">
                                 </td>
                                 <td>
-                                    <input type="text" value="{{ $month->taxes }}" id="taxes-{{ $month->id }}" readonly="readonly">
+                                    <input type="text" value="" id="taxes-{{ $month->id }}" readonly="readonly">
                                     <a href="{{ url('taxes/month/' . $month->id . '/edit') }}"><span class="glyphicon glyphicon-wrench"></span></a>
                                 </td>
                                 <td>
