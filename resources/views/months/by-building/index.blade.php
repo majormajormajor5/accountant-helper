@@ -43,12 +43,13 @@
                     {{--<a href="{{ url('months/create') }}" class="btn btn-info"><span class="glyphicon glyphicon-plus"> </span> Добавить</a>--}}
                 {{--</div>--}}
             {{--@else--}}
-                    {!! Form::open(['method' => 'GET', 'class' => 'form-horizontal', 'v-show' => 'showFilters']) !!}
+                    {!! Form::open(['method' => 'GET', 'class' => 'form-horizontal', 'v-show' => 'showFilters', 'style' => 'margin-top: 1em;']) !!}
                         <div class="form-group">
                             <label class="control-label col-sm-2" for="name">С даты:</label>
                             <datepicker language="ru" name="from-date" format="dd-MM-yyyy" class="" value="{{ $request['from-date'] }}"></datepicker>
                         </div>
                         <div class="form-group">
+                            <label class="control-label col-sm-2" for="name">По дату:</label>
                             <datepicker language="ru" name="to-date" format="dd-MM-yyyy" class="" value="{{ $request['to-date'] }}"></datepicker>
                         </div>
                         <div class="form-group">
@@ -203,7 +204,7 @@
                     xmlhttp.open('POST', "{{ url('months') }}" + '/' + monthId, true);
                     xmlhttp.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
                     xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                    console.log(columnName, value);
+//                    console.log(columnName, value, 'monthId:', monthId);
                     xmlhttp.send("_method=" + "PATCH" + "&_token=" + "{{ csrf_token() }}" + "&columnName=" + columnName + "&value=" + value);
                 },
 

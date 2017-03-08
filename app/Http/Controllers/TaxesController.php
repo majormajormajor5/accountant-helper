@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Input;
 use League\Flysystem\Exception;
+use Illuminate\Support\Facades\Mail;
 
 class TaxesController extends Controller
 {
@@ -181,7 +182,15 @@ class TaxesController extends Controller
             $months = $months->where('id', $monthId);
         }
 
-        $months->update($request->only(['taxes']));
+//        $months->update($request->only(['taxes']));
+
+        $months = $months->get();
+
+        foreach ($months as $month) {
+            //TODO Replace single updates in loop with mass update
+            $month->update($request->only(['taxes']));
+            $this->recalculateBeginningSum($month);
+        }
 
         if (! $months) {
             return redirect()->back();
@@ -204,7 +213,9 @@ class TaxesController extends Controller
     public function byBuilding(Request $request, $buildingId)
     {
         $months = Month
-            ::where('months.building_id', $buildingId)
+            ::where('user_id', Auth::user()->id)
+            ->where('building_id', $buildingId)
+            ->with(['apartment', 'apartment.building'])
             ->where('month', $this->getCurrentMonth()->format('Y-m-d'));
 
         if ($request['from-date']) {
@@ -224,9 +235,7 @@ class TaxesController extends Controller
         }
 
         $months = $months
-            ->join('apartments', 'months.apartment_id', '=', 'apartments.id')
-            ->get()
-            ->sortBy('number'); //Sort by apartment's number
+            ->get();
 
         $variables = [];
         foreach ($months as $month) {
@@ -243,11 +252,18 @@ class TaxesController extends Controller
             $month->taxes = '{}';
         }
 
+        $combMonths = [];
+        foreach ($months as $month) {
+            $combMonths[$month->apartment->number] = $month;
+        }
+
+        ksort($combMonths);
+
         $building = Building::where('id', $buildingId)
             ->with(['organization'])
             ->first();
 
-        return view('taxes.by-building.index', compact('months', 'buildingId', 'building', 'request', 'variables'));
+        return view('taxes.by-building.index', compact('months', 'buildingId', 'building', 'request', 'variables', 'combMonths'));
     }
 
     public function getCurrentMonth()
@@ -257,6 +273,7 @@ class TaxesController extends Controller
 
     public function updateTaxesVariables(Request $request, $monthId)
     {
+        $request['variableName'] = json_decode('"'.$request['variableName'].'"');
 
         $rules = [
             'user_id' => 'not_present',
@@ -288,11 +305,11 @@ class TaxesController extends Controller
             ->where('user_id', Auth::user()->id)
             ->first();
 
-        $taxes = json_decode($month->taxes,true);
+        $taxes = json_decode($month->taxes, true);
 
         $taxes['variables'][$request['variableName']] = $request['value'];
-
-        $month->update(['taxes' => json_encode($taxes)]);
+//        echo $ad;
+        $month->update(['taxes' => json_encode($taxes, JSON_UNESCAPED_UNICODE)]);
 
         $this->recalculateBeginningSum($month);
 
@@ -318,18 +335,25 @@ class TaxesController extends Controller
         $formulaWithVariablesValues = str_replace($vars, $varsReplacementsValues, $formula);
         $formulaWithVariables = str_replace($vars, $varsReplacements, $formula);
 
-        if (! $this->validateFormula($formulaWithVariablesValues)) {
-            return false;
-        }
+//        if (! $this->validateFormula($formulaWithVariablesValues)) {
+//            return false;
+//        }
 
+        $formulaWithVariables = str_replace('month_square', $month->apartment->square, $formulaWithVariables);
+        $formulaWithVariables = str_replace('month_number_of_residents', $month->apartment->number_of_residents, $formulaWithVariables);
+        var_dump($formulaWithVariables);
+        var_dump($month->square);
         eval( '$beginningSum = (' . $formulaWithVariables . ');' );
 
+        var_dump($formulaWithVariablesValues);
         $month->beginning_sum = $beginningSum;
         if ($previousMonth = $this->getPreviousMonthFrom($month)) {
             $month->beginning_sum += $previousMonth->balance;
         }
         $month->balance = $month->beginning_sum - $month->ending_sum;
         $month->save();
+
+        return $month->beginning_sum;
     }
 
     public function validateFormula($formula)
@@ -349,5 +373,66 @@ class TaxesController extends Controller
         }
 
         return false;
+    }
+
+    public function updateTaxesVariablesTest(Request $request)
+    {
+        $monthId = 46;
+        $request['variableName'] = 'счетчик';
+        $request['variableName'] = json_decode('"'.$request['variableName'].'"');
+        $request['value'] = 666;
+        $rules = [
+            'user_id' => 'not_present',
+            'beginning_sum' => 'not_present',
+            'balance' => 'not_present',
+            'taxes' => 'not_present',
+            'created_at' => 'not_present',
+            'updated_at' => 'not_present',
+            'month' => 'not_present',
+//            'value' => 'numeric'
+            'value' => ['regex:/^[0-9]{1,16}\.[0-9]{0,4}$/']
+        ];
+
+        $dataForValidation = [$request['variableName'] => $request['value']];
+        $validator = Validator::make($dataForValidation, $rules);
+
+        // Validate the input and return correct response
+        if ($validator->fails())
+        {
+            return Response::json([
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+
+            ], 200);
+        }
+
+
+        $month = Month::where('id', $monthId)
+            ->where('user_id', Auth::user()->id)
+            ->with(['apartment'])
+            ->first();
+
+        $taxes = json_decode($month->taxes,true);
+
+        $taxes['variables'][$request['variableName']] = $request['value'];
+
+//        return var_dump(((json_encode($taxes, JSON_UNESCAPED_UNICODE))) );
+//        $month->update(['taxes' => json_encode($taxes, JSON_UNESCAPED_UNICODE)]);
+
+        $this->recalculateBeginningSum($month);
+
+        return Response::json(['success' => true], 200);
+    }
+
+    public function mailTest()
+    {
+        Mail::send('emails.send', ['title' => 'title', 'content' => 'content'], function ($message)
+        {
+
+            $message->from('osmd09@mail.ru', 'Christian Nwamba');
+
+            $message->to('addictedtothelove@gmail.com');
+
+        });
     }
 }

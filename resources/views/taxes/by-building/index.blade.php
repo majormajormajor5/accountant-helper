@@ -1,7 +1,7 @@
 @extends('layout')
 
 @section('title')
-    Счета дома {{ $building->name }}
+    Налоги дома {{ $building->name }}
     организации {{ $building->organization->name }}
 @endsection
 
@@ -9,7 +9,7 @@
     <div class="row">
         <div class="col-sm-12">
             <h3>
-                Счета дома {{ $building->name }}
+                Налоги дома {{ $building->name }}
                 организации {{ $building->organization->name }}
             </h3>
             <hr style="
@@ -75,7 +75,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach ($months as $month)
+                    @foreach ($combMonths as $month)
                         <tr v-if="months[{{ $loop->index . '' }}]" v-on:dblclick.ctrl="months[{{ $loop->index . '' }}] = false">
                             <td>
                                 <a href="#">{{ $month->apartment->number }}</a>
@@ -178,6 +178,7 @@
 
                         if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
                             if (xmlhttp.status == 200) {
+//                                console.log(xmlhttp.responseText)
                                 var response = JSON.parse(xmlhttp.responseText);
                                 if (! response.success) {
                                     app.emitAlert();
@@ -198,6 +199,7 @@
                     xmlhttp.open('POST', "{{ url('taxes-variables/month') }}" + '/' + monthId, true);
                     xmlhttp.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
                     xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    console.log(columnName, value, monthId);
                     xmlhttp.send("_method=" + "PATCH" + "&_token=" + "{{ csrf_token() }}" + "&variableName=" + columnName + "&value=" + value);
                 },
 

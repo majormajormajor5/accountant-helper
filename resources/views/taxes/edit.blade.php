@@ -120,8 +120,8 @@
             <h4>Переменные:</h4>
             <div class="formula-drop-items variable-container" id="formula-drop-variables">
 
-                <a href="#" class="formula-custom" data-value="{{ $month->number_of_residents }}">Количество проживающих</a>
-                <a href="#" class="formula-custom" data-value="{{ $month->square }}">Площать</a>
+                <a href="#" class="formula-custom" data-value="month_number_of_residents">Количество проживающих</a>
+                <a href="#" class="formula-custom" data-value="month_square">Площать</a>
             </div>
         </div>
     </div>
