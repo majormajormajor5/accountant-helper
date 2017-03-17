@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class BillsController extends Controller
 {
@@ -46,7 +47,11 @@ class BillsController extends Controller
             ->with(['apartments'])
             ->first();
 
-        return view('bills.by-building.create', compact('building'));
+        $bills = Bill::where('user_id', Auth::user()->id)
+            ->get()
+            ->pluck('name', 'id');
+
+        return view('bills.by-building.create', compact('building', 'bills'));
     }
 
     /**
@@ -64,6 +69,7 @@ class BillsController extends Controller
             ->get();
 
         $bill = Bill::where('user_id', Auth::user()->id)
+            ->where('id', $request['bills'])
             ->first();
 
         foreach ($months as $month) {
@@ -85,7 +91,7 @@ class BillsController extends Controller
             }
 
             $billContent = str_replace($billData, $billDataReplacements, $bill->content);
-            var_dump($billContent);die;
+            Storage::disk('local')->put($month->id . '_bill', $billContent);
         }
     }
 
@@ -136,6 +142,11 @@ class BillsController extends Controller
     }
 
     public function send()
+    {
+
+    }
+
+    public function templateCreate()
     {
 
     }
