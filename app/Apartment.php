@@ -25,6 +25,8 @@ class Apartment extends Model
         return $this->belongsToMany('App\Owner');
     }
 
+
+
     public function months()
     {
         return $this->hasMany('App\Month');
